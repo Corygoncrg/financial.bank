@@ -1,4 +1,4 @@
-package com.example.financial.transactions.configuration;
+package com.example.financial.transactions.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

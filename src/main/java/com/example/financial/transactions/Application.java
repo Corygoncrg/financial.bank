@@ -1,7 +1,7 @@
 package com.example.financial.transactions;
 
 import com.example.financial.transactions.Service.StorageService;
-import com.example.financial.transactions.configuration.StorageProperties;
+import com.example.financial.transactions.config.StorageProperties;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
