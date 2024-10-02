@@ -1,7 +1,6 @@
 package com.example.financial.transactions.config;
 
 import com.example.financial.transactions.Service.LocalDateTimeEditor;
-import com.example.financial.transactions.dto.TransactionDto;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
 import com.example.financial.transactions.repository.TransactionRepository;
@@ -23,11 +22,9 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.format.datetime.standard.DateTimeFormatterFactory;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
@@ -46,7 +43,6 @@ public class SpringBatchConfig {
     public DataSourceTransactionManager transactionManager(DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
-
 
     @Bean
     @StepScope
@@ -76,7 +72,6 @@ public class SpringBatchConfig {
             return transaction;
         };
     }
-
 
     @Bean
     public JdbcBatchItemWriter<TransactionCsv> writer(DataSource dataSource) {
