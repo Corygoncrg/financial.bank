@@ -3,10 +3,13 @@ package com.example.financial.transactions.model;
 import com.example.financial.transactions.dto.TransactionDto;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 @Entity(name = "Transaction")
 @Table(name = "transactions")
 public class TransactionCsv {
@@ -15,19 +18,18 @@ public class TransactionCsv {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String originBank;
-    private String originAgency;
+    private String originalBank;
+    private String originalAgency;
     private String originalAccount;
     private String destinyBank;
     private String destinyAgency;
     private String destinyAccount;
-    private float amount;
+    private BigDecimal amount;
     private LocalDateTime transactionTime;
 
-
     public TransactionCsv(TransactionDto dto) {
-        this.originBank = dto.originBank();
-        this.originAgency = dto.originAgency();
+        this.originalBank = dto.originalBank();
+        this.originalAgency = dto.originalAgency();
         this.originalAccount =dto.originalAccount();
         this.destinyBank = dto.destinyBank();
         this.destinyAgency = dto.destinyAgency();
