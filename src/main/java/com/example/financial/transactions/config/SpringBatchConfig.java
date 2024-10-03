@@ -1,9 +1,9 @@
 package com.example.financial.transactions.config;
 
-import com.example.financial.transactions.Service.LocalDateTimeEditor;
+import com.example.financial.transactions.TransactionCsvService;
+import com.example.financial.transactions.Service.LineMapperService;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
-import com.example.financial.transactions.repository.TransactionRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -15,11 +15,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
-import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
-import org.springframework.batch.item.file.mapping.DefaultLineMapper;
-import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -29,15 +25,16 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
-import java.util.Collections;
 
 @Configuration
 @EnableBatchProcessing
 public class SpringBatchConfig {
 
+    @Autowired
+    private LineMapperService lineMapperService;
 
     @Autowired
-    private TransactionRepository repository;
+    private TransactionCsvService csvService;
 
     @Bean
     public DataSourceTransactionManager transactionManager(DataSource dataSource) {
@@ -51,32 +48,32 @@ public class SpringBatchConfig {
                 .name("transactionItemReader")
                 .resource(new FileSystemResource("upload-dir/" + filename))
                 .delimited()
-                .names("originalBank", "originalAgency", "originalAccount", "destinyBank", "destinyAgency", "destinyAccount", "amount", "transactionTime")
+                .names("original_bank", "original_agency", "original_account",
+                        "destiny_bank", "destiny_agency", "destiny_account", "amount", "transaction_time")
                 .targetType(TransactionCsvRecord.class)
-                .lineMapper(lineMapper())
+                .lineMapper(lineMapperService.lineMapper())
                 .build();
     }
 
     @Bean
     public ItemProcessor<TransactionCsvRecord, TransactionCsv> processor() {
-        return csvRecord -> {
-            TransactionCsv transaction = new TransactionCsv();
-            transaction.setOriginalBank(csvRecord.getOriginalBank());
-            transaction.setOriginalAgency(csvRecord.getOriginalAgency());
-            transaction.setOriginalAccount(csvRecord.getOriginalAccount());
-            transaction.setDestinyBank(csvRecord.getDestinyBank());
-            transaction.setDestinyAgency(csvRecord.getDestinyAgency());
-            transaction.setDestinyAccount(csvRecord.getDestinyAccount());
-            transaction.setAmount(csvRecord.getAmount());
-            transaction.setTransactionTime(csvRecord.getTransactionTime());
-            return transaction;
+
+        return new ItemProcessor<TransactionCsvRecord, TransactionCsv>() {
+
+            private LocalDateTime firstTransactionDate = null; // Holds the first transaction's date
+
+            @Override
+            public TransactionCsv process(TransactionCsvRecord csvRecord) throws Exception {
+                return csvService.validateDate(csvRecord);
+            }
         };
+
     }
 
     @Bean
     public JdbcBatchItemWriter<TransactionCsv> writer(DataSource dataSource) {
         return new JdbcBatchItemWriterBuilder<TransactionCsv>()
-                .sql("INSERT INTO transactions (originalBank, originalAgency, originalAccount, destinyBank, destinyAgency, destinyAccount, amount, transactionTime) " +
+                .sql("INSERT INTO transactions (original_bank, original_agency, original_account, destiny_bank, destiny_agency, destiny_account, amount, transaction_time) " +
                         "VALUES (:originalBank, :originalAgency, :originalAccount, :destinyBank, :destinyAgency, :destinyAccount, :amount, :transactionTime)")
                 .dataSource(dataSource)
                 .beanMapped()
@@ -92,8 +89,10 @@ public class SpringBatchConfig {
     }
 
     @Bean
-    public Step step1(JobRepository jobRepository, DataSourceTransactionManager transactionManager,
-                      FlatFileItemReader<TransactionCsvRecord> reader, JdbcBatchItemWriter<TransactionCsv> writer,
+    public Step step1(JobRepository jobRepository,
+                      DataSourceTransactionManager transactionManager,
+                      FlatFileItemReader<TransactionCsvRecord> reader,
+                      JdbcBatchItemWriter<TransactionCsv> writer,
                       ItemProcessor<TransactionCsvRecord, TransactionCsv> processor) {
         return new StepBuilder("step1", jobRepository)
                 .<TransactionCsvRecord, TransactionCsv>chunk(3, transactionManager)
@@ -101,26 +100,5 @@ public class SpringBatchConfig {
                 .processor(processor)
                 .writer(writer)
                 .build();
-    }
-
-    private LineMapper<TransactionCsvRecord> lineMapper() {
-        DefaultLineMapper<TransactionCsvRecord> lineMapper = new DefaultLineMapper<>();
-
-        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
-        lineTokenizer.setDelimiter(",");
-        lineTokenizer.setStrict(false);
-        lineTokenizer.setNames("originalBank","originalAgency","originalAccount",
-                "destinyBank","destinyAgency", "destinyAccount", "amount","transactionTime");
-
-        BeanWrapperFieldSetMapper<TransactionCsvRecord> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
-        fieldSetMapper.setTargetType(TransactionCsvRecord.class);
-
-        fieldSetMapper.setCustomEditors(Collections.singletonMap(
-                LocalDateTime.class, new LocalDateTimeEditor("yyyy-MM-dd'T'HH:mm:ss")
-        ));
-
-        lineMapper.setLineTokenizer(lineTokenizer);
-        lineMapper.setFieldSetMapper(fieldSetMapper);
-        return lineMapper;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.financial.transactions.config;
 
 import com.example.financial.transactions.dto.TransactionDto;
+import com.example.financial.transactions.model.TransactionCsvRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -26,7 +27,7 @@ public class JobCompletionNotificationListener implements JobExecutionListener {
             log.info("!!! JOB FINISHED! Time to verify the results");
 
             jdbcTemplate
-                    .query("SELECT originalBank, originalAgency, originalAccount, destinyBank, destinyAgency, destinyAccount, amount, transactionTime FROM transactions", new DataClassRowMapper<>(TransactionDto.class))
+                    .query("SELECT original_bank, original_agency, original_account, destiny_bank, destiny_agency, destiny_account, amount, transaction_time FROM transactions", new DataClassRowMapper<>(TransactionCsvRecord.class))
                     .forEach(transaction -> log.info("Found <{{}}> in the database.", transaction));
         }
     }
