@@ -1,5 +1,6 @@
 package com.example.financial.transactions.Service;
 
+import com.example.financial.transactions.model.LocalDateTimeEditor;
 import com.example.financial.transactions.model.TransactionCsvRecord;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -10,8 +11,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import static com.example.financial.transactions.Service.SqlService.listFields;
+
 @Service
 public class LineMapperService {
+
 
     public LineMapper<TransactionCsvRecord> lineMapper() {
         DefaultLineMapper<TransactionCsvRecord> lineMapper = new DefaultLineMapper<>();
@@ -19,8 +23,7 @@ public class LineMapperService {
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
         lineTokenizer.setStrict(false);
-        lineTokenizer.setNames("original_bank", "original_agency", "original_account",
-                "destiny_bank", "destiny_agency", "destiny_account", "amount", "transaction_time");
+        lineTokenizer.setNames(listFields);
 
         BeanWrapperFieldSetMapper<TransactionCsvRecord> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
         fieldSetMapper.setTargetType(TransactionCsvRecord.class);

@@ -1,13 +1,10 @@
-package com.example.financial.transactions.Service;
+package com.example.financial.transactions.model;
 
-import com.example.financial.transactions.model.TransactionCsv;
-import com.example.financial.transactions.model.TransactionCsvRecord;
-import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
 
-@Service
-public class TransactionRecordToCsvService {
+public class TransactionRecordToCsv {
 
-    public static TransactionCsv transactionAdapter(TransactionCsvRecord csvRecord) {
+    public static TransactionCsv transactionAdapter(TransactionCsvRecord csvRecord, LocalDateTime importDate) {
         TransactionCsv transaction = new TransactionCsv();
         transaction.setOriginalBank(csvRecord.getOriginalBank());
         transaction.setOriginalAgency(csvRecord.getOriginalAgency());
@@ -17,6 +14,7 @@ public class TransactionRecordToCsvService {
         transaction.setDestinyAccount(csvRecord.getDestinyAccount());
         transaction.setAmount(csvRecord.getAmount());
         transaction.setTransactionTime(csvRecord.getTransactionTime());
+        transaction.setImportDate(importDate);
         return transaction;
     }
 }

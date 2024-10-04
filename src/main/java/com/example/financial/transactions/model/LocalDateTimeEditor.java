@@ -1,4 +1,4 @@
-package com.example.financial.transactions.Service;
+package com.example.financial.transactions.model;
 
 import java.beans.PropertyEditorSupport;
 import java.time.LocalDateTime;

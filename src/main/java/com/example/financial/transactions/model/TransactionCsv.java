@@ -1,6 +1,5 @@
 package com.example.financial.transactions.model;
 
-import com.example.financial.transactions.dto.TransactionDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,15 +25,6 @@ public class TransactionCsv {
     private String destinyAccount;
     private BigDecimal amount;
     private LocalDateTime transactionTime;
+    private LocalDateTime importDate;
 
-    public TransactionCsv(TransactionDto dto) {
-        this.originalBank = dto.originalBank();
-        this.originalAgency = dto.originalAgency();
-        this.originalAccount =dto.originalAccount();
-        this.destinyBank = dto.destinyBank();
-        this.destinyAgency = dto.destinyAgency();
-        this.destinyAccount = dto.destinyAccount();
-        this.amount = dto.amount();
-        this.transactionTime = dto.transactionTime();
-    }
 }

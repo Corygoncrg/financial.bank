@@ -1,6 +1,6 @@
 package com.example.financial.transactions.config;
 
-import com.example.financial.transactions.TransactionCsvService;
+import com.example.financial.transactions.Service.TransactionCsvService;
 import com.example.financial.transactions.Service.LineMapperService;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
@@ -24,7 +24,10 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
+
 import java.time.LocalDateTime;
+
+import static com.example.financial.transactions.Service.SqlService.*;
 
 @Configuration
 @EnableBatchProcessing
@@ -48,33 +51,22 @@ public class SpringBatchConfig {
                 .name("transactionItemReader")
                 .resource(new FileSystemResource("upload-dir/" + filename))
                 .delimited()
-                .names("original_bank", "original_agency", "original_account",
-                        "destiny_bank", "destiny_agency", "destiny_account", "amount", "transaction_time")
+                .names(listFields)
                 .targetType(TransactionCsvRecord.class)
                 .lineMapper(lineMapperService.lineMapper())
                 .build();
     }
 
     @Bean
-    public ItemProcessor<TransactionCsvRecord, TransactionCsv> processor() {
-
-        return new ItemProcessor<TransactionCsvRecord, TransactionCsv>() {
-
-            private LocalDateTime firstTransactionDate = null; // Holds the first transaction's date
-
-            @Override
-            public TransactionCsv process(TransactionCsvRecord csvRecord) throws Exception {
-                return csvService.validateDate(csvRecord);
-            }
-        };
-
+    @StepScope
+    public ItemProcessor<TransactionCsvRecord, TransactionCsv> processor(@Value("#{stepExecution.jobExecution.createTime}") LocalDateTime importDate) {
+        return csvRecord -> csvService.processRecord(csvRecord, importDate);
     }
 
     @Bean
     public JdbcBatchItemWriter<TransactionCsv> writer(DataSource dataSource) {
         return new JdbcBatchItemWriterBuilder<TransactionCsv>()
-                .sql("INSERT INTO transactions (original_bank, original_agency, original_account, destiny_bank, destiny_agency, destiny_account, amount, transaction_time) " +
-                        "VALUES (:originalBank, :originalAgency, :originalAccount, :destinyBank, :destinyAgency, :destinyAccount, :amount, :transactionTime)")
+                .sql("INSERT INTO transactions (" + allFields + ") VALUES (" + allJavaFields +")")
                 .dataSource(dataSource)
                 .beanMapped()
                 .build();
