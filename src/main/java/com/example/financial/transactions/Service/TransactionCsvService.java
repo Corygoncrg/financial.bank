@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-import static com.example.financial.transactions.model.TransactionRecordToCsv.transactionAdapter;
+import static com.example.financial.transactions.model.TransactionAdapter.transactionRecordToCsvAdapter;
 
 @Service
 public class TransactionCsvService {
@@ -19,7 +19,7 @@ public class TransactionCsvService {
     private LocalDateTime firstTransactionDate = null;
 
     public TransactionCsv processRecord(TransactionCsvRecord csvRecord, LocalDateTime importDate) {
-        LocalDateTime currentTransactionTime = csvRecord.getTransactionTime();
+        LocalDateTime currentTransactionTime = csvRecord.getTransactionDate();
 
         if (firstTransactionDate == null) {
             firstTransactionDate = currentTransactionTime;
@@ -27,13 +27,13 @@ public class TransactionCsvService {
         }
 
         if (isSameDay(currentTransactionTime, firstTransactionDate)) {
-            if (repository.existsByTransactionTime(currentTransactionTime)) {
+            if (repository.existsByTransactionDate(currentTransactionTime)) {
                 // If the transaction is a duplicate, log and skip it
                 System.out.println("Duplicate transaction detected, skipping: " + currentTransactionTime);
                 return null;  // Skip the record if it's a duplicate
             }
             System.out.println("Processing transaction with date: " + currentTransactionTime);
-            return transactionAdapter(csvRecord, importDate);
+            return transactionRecordToCsvAdapter(csvRecord, importDate);
         } else {
             System.out.println("Skipping transaction with date: " + currentTransactionTime);
         }

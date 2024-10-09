@@ -16,6 +16,6 @@ public class TransactionCsvRecord {
     private String destinyAgency;
     private String destinyAccount;
     private BigDecimal amount;
-    private LocalDateTime transactionTime;
+    private LocalDateTime transactionDate;
     private LocalDateTime importDate;
 }

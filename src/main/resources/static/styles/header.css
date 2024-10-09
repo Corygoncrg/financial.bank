@@ -1,0 +1,17 @@
+.header__class {
+    height: auto;
+    width: 100%;
+    display: flexbox;
+    justify-content: baseline;
+    padding-left: 1em;
+    font-size: 2.3em;
+    font-style: italic;
+    margin-bottom: 30px;
+    background-color: var(--blue);
+    color: var(--white);
+}
+
+
+.form__section {
+    display: flex;
+}

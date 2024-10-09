@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.stream.Stream;
 
 import com.example.financial.transactions.config.StorageProperties;
@@ -109,6 +110,12 @@ public class FileSystemStorageService implements StorageService {
 	@Override
 	public void deleteAll() {
 		FileSystemUtils.deleteRecursively(rootLocation.toFile());
+	}
+
+	@Override
+	public List<String> loadFileContent(String filename) throws IOException {
+		Path file = load(filename);  // Load the file path
+		return Files.readAllLines(file);  // Read file content into a List of Strings
 	}
 
 	@Override
