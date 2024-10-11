@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header__class">
+        <div class="header__div">
+            <h1>COM.EXAMPLE</h1>
+        </div>
+    </header>
+
+    <section class="form__section">
+
+        <main>
+            <!-- Form to upload file -->
+            <div class="form__div">
+                <form method="POST" enctype="multipart/form-data" action="http://localhost:8080/">
+                    <div class="form__div">
+                        <div class="form__tr">
+                            <h2 class="form__text">File to upload:</h2>
+                            <label for="file" class="label__button">Choose a file to upload</label> <input type="file" name="file" id="file" value="file" required />
+                        </div>
+                        <div class="form__upload">
+                            <label class="label__button" for="submit">Upload</label>
+                            <input type="submit" id="submit" /> 
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </section>
+
+    <section class="table__section">
+        <!-- List of uploaded files -->
+        <h2 class="form__text"> Imports made: </h2>
+        <div class="list__div">
+            <ul>
+            </ul>
+        </div>
+    </section>
+
+    <script src="scripts/GetData.js" defer></script>
+</body>
+
+</html>
