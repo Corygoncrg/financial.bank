@@ -1,8 +1,11 @@
 package com.example.users.model;
 
 
+import com.example.users.dto.UserDto;
 import com.example.users.dto.UserRegisterDto;
+import com.example.users.dto.UserUpdateDto;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.messaging.simp.user.SimpSession;
@@ -25,6 +28,7 @@ public class User implements SimpUser {
     private String name;
     private String email;
     private String password;
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     public User(UserRegisterDto dto) {
@@ -54,4 +58,22 @@ public class User implements SimpUser {
     public Set<SimpSession> getSessions() {
         return Set.of();
     }
+
+    public void deactivate() {
+        this.status = UserStatus.NOT_ACTIVE;
+    }
+
+    public void update(UserUpdateDto dto) {
+        if (dto.name() != null) {
+            this.name = dto.name();
+        }
+        if (dto.email() != null) {
+            this.email = dto.email();
+        }
+        if (dto.status() != null) {
+            this.status = dto.status();
+        }
+    }
+
+
 }
