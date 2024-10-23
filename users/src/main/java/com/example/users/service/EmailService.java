@@ -1,7 +1,7 @@
 package com.example.users.service;
 
-import com.example.users.dto.UserRegisterDto;
 import com.example.users.model.User;
+import com.example.users.model.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -14,14 +14,14 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendPasswordEmail(User user) {
+    public void sendPasswordEmail(User user, UserValidator validator) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(user.getEmail());
         msg.setSubject("Test email");
-        msg.setText("Dear " + user.getName() + ", your password has been set to: " + user.getPassword());
+        msg.setText("Dear " + user.getName() + ", your password has been set to: " + user.getPassword() +
+                "\nYour validation key is: " + validator.getUuid());
         try {
             mailSender.send(msg);
-            System.out.println("Try");
         }
         catch (MailException ex) {
             // simply log it and go on...

@@ -1,25 +1,24 @@
 package com.example.users.model;
 
 
-import com.example.users.dto.UserDto;
-import com.example.users.dto.UserRegisterDto;
-import com.example.users.dto.UserUpdateDto;
+import com.example.users.dto.user.UserRegisterDto;
+import com.example.users.dto.user.UserUpdateDto;
 import jakarta.persistence.*;
-import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.messaging.simp.user.SimpSession;
-import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.security.Principal;
+import java.util.Collection;
+import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User implements SimpUser {
+public class User  implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,27 +37,6 @@ public class User implements SimpUser {
         this.status = UserStatus.PENDING;
     }
 
-
-    @Override
-    public Principal getPrincipal() {
-        return null;
-    }
-
-    @Override
-    public boolean hasSessions() {
-        return false;
-    }
-
-    @Override
-    public SimpSession getSession(String sessionId) {
-        return null;
-    }
-
-    @Override
-    public Set<SimpSession> getSessions() {
-        return Set.of();
-    }
-
     public void deactivate() {
         this.status = UserStatus.NOT_ACTIVE;
     }
@@ -73,6 +51,20 @@ public class User implements SimpUser {
         if (dto.status() != null) {
             this.status = dto.status();
         }
+    }
+
+    public void validate() {
+        this.status = UserStatus.ACTIVE;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getUsername() {
+        return name;
     }
 
 
