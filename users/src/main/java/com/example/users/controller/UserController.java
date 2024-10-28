@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -71,10 +73,6 @@ public class UserController {
         var token = loginService.login(dto);
         System.out.println(token);
         return ResponseEntity.ok(token);
-        //TODO: Add a log-in, where the user needs to be logged-in in order to users
-        // When the user logs-in, the token will be saved somewhere in his computer, and with that
-        // he'll be able to access the pages, and from the token we are able to identify the user
-        //
     }
 
     @GetMapping("verify/{uuid}")
@@ -87,5 +85,13 @@ public class UserController {
             case SUCCESS -> ResponseEntity.ok().body("User validated");
             case INVALID_UUID_FORMAT -> ResponseEntity.badRequest().body("Invalid UUID format");
         };
+    }
+
+    @GetMapping("current-user")
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+
+        var user = service.checkCurrentUser(userDetails);
+
+        return ResponseEntity.ok(user);
     }
 }

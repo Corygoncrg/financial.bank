@@ -1,5 +1,6 @@
 package com.example.users.service;
 
+import com.example.users.dto.user.UserDto;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.*;
@@ -7,6 +8,7 @@ import com.example.users.repository.UserRepository;
 import com.example.users.repository.UserValidatorRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -103,5 +105,10 @@ public class UserService {
         } catch (IllegalArgumentException e) {
             return VerifyUserResult.INVALID_UUID_FORMAT;
         }
+    }
+
+    public UserDto checkCurrentUser(UserDetails userDetails) {
+        User user = repository.findByName(userDetails.getUsername());
+        return new UserDto(user);
     }
 }
