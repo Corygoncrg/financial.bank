@@ -1,6 +1,5 @@
 package com.example.users.service;
 
-import com.example.users.dto.user.UserDto;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.*;
@@ -64,7 +63,7 @@ public class UserService {
         return UpdateUserResult.SUCCESS;
     }
 
-    public DeactivateUserResult deactiveUser (Long id) {
+    public DeactivateUserResult deactivateUser(Long id) {
         if (id == 1L) {
             return DeactivateUserResult.ADMIN_DELETE_DENIED;
         }

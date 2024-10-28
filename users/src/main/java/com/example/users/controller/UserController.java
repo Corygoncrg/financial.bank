@@ -6,8 +6,6 @@ import com.example.users.dto.user.UserDto;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.*;
-import com.example.users.repository.UserRepository;
-import com.example.users.repository.UserValidatorRepository;
 import com.example.users.service.LoginService;
 import com.example.users.service.UserService;
 import jakarta.validation.Valid;
@@ -24,13 +22,13 @@ import java.util.stream.Collectors;
 public class UserController {
 
     @Autowired
-    UserService service;
+    private UserService service;
 
     @Autowired
     private LoginService loginService;
 
     @GetMapping
-    public List<UserDto> hi() {
+    public List<UserDto> listUsers() {
         var user = service.listUsers();
 
         return user.stream().map(UserDto::new).collect(Collectors.toList());
@@ -60,7 +58,7 @@ public class UserController {
 
     @DeleteMapping("{id}")
     public ResponseEntity<String> DeactivateUser(@PathVariable Long id) {
-        DeactivateUserResult result = service.deactiveUser(id);
+        DeactivateUserResult result = service.deactivateUser(id);
         return switch (result) {
             case ADMIN_DELETE_DENIED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("The admin cannot be deactivated");
             case USER_ALREADY_NOT_ACTIVE -> ResponseEntity.badRequest().body("This user is already deactivated!");
@@ -68,11 +66,15 @@ public class UserController {
         };
     }
 
-
     @PostMapping("login")
-    private ResponseEntity<TokenJWTDTO> login(@RequestBody @Valid AuthenticationDTO dto) {
-        return loginService.login(dto);
+    public ResponseEntity<TokenJWTDTO> login(@RequestBody @Valid AuthenticationDTO dto) {
+        var token = loginService.login(dto);
+        System.out.println(token);
+        return ResponseEntity.ok(token);
         //TODO: Add a log-in, where the user needs to be logged-in in order to users
+        // When the user logs-in, the token will be saved somewhere in his computer, and with that
+        // he'll be able to access the pages, and from the token we are able to identify the user
+        //
     }
 
     @GetMapping("verify/{uuid}")
