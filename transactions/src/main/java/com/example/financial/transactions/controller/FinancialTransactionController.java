@@ -44,7 +44,12 @@ public class FinancialTransactionController {
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-        return transactionService.getResourceResponseEntity(filename, storageService);
+        var file = transactionService.getResourceResponseEntity(filename, storageService);
+        if (file == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
     @GetMapping("/transactions")

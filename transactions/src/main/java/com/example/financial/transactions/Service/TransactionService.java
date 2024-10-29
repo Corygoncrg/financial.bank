@@ -33,14 +33,8 @@ public class TransactionService {
     @Autowired
     private CsvParserService csvParserService;
 
-    public  ResponseEntity<Resource> getResourceResponseEntity(String filename, StorageService storageService) {
-        Resource file = storageService.loadAsResource(filename);
-
-        if (file == null)
-            return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    public Resource getResourceResponseEntity(String filename, StorageService storageService) {
+        return storageService.loadAsResource(filename);
     }
 
     public List<TransactionCsvRecord> getTransactionsFromFiles(StorageService storageService) throws IOException {

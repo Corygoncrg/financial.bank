@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('/transactions')
+    fetch('/transactions', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`, // Include token in the header
+            'Content-Type': 'application/json'
+        }
+    })
         .then(response => response.json())
         .then(transactions => {
             const list = document.querySelector('.list__div ul');
