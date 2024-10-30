@@ -57,7 +57,7 @@ public class TransactionService {
         return transactions.stream().map(TransactionAdapter::transactionCsvToRecordAdapter).collect(Collectors.toList());
     }
 
-    public void csvFileUpload(MultipartFile csvFile, RedirectAttributes redirectAttributes, JobLauncher jobLauncher, Job importTransactionJob, StorageService storageService) {
+    public void csvFileUpload(MultipartFile csvFile, String userId, RedirectAttributes redirectAttributes, JobLauncher jobLauncher, Job importTransactionJob, StorageService storageService) {
         String filename = storageService.store(csvFile);
 
         JobParameters jobParameters = new JobParametersBuilder()

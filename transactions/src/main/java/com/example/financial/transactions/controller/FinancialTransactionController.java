@@ -60,8 +60,8 @@ public class FinancialTransactionController {
     }
 
     @PostMapping("/")
-    public String handleCsvFileUpload(@RequestParam("file") MultipartFile csvFile, RedirectAttributes redirectAttributes) {
-        transactionService.csvFileUpload(csvFile, redirectAttributes, jobLauncher, importTransactionJob, storageService);
+    public String handleCsvFileUpload(@RequestParam("file") MultipartFile csvFile, @RequestParam("userId") String userId, RedirectAttributes redirectAttributes) {
+        transactionService.csvFileUpload(csvFile, userId, redirectAttributes, jobLauncher, importTransactionJob, storageService);
         return "redirect:/";
     }
 

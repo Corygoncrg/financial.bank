@@ -15,6 +15,7 @@ public class TransactionAdapter {
         transaction.setAmount(csvRecord.getAmount());
         transaction.setTransactionDate(csvRecord.getTransactionDate());
         transaction.setImportDate(importDate);
+        transaction.setIdUser(csvRecord.getIdUser());
         return transaction;
     }
 
@@ -29,6 +30,7 @@ public class TransactionAdapter {
         record.setAmount(transaction.getAmount());
         record.setTransactionDate(transaction.getTransactionDate());
         record.setImportDate(transaction.getImportDate());
+        record.setIdUser(transaction.getIdUser());
         return record;
     }
 }

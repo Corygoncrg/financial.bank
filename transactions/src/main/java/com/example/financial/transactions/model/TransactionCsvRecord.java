@@ -18,4 +18,5 @@ public class TransactionCsvRecord {
     private BigDecimal amount;
     private LocalDateTime transactionDate;
     private LocalDateTime importDate;
+    private User idUser;
 }

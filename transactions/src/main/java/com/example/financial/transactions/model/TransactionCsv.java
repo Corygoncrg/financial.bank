@@ -26,5 +26,8 @@ public class TransactionCsv {
     private BigDecimal amount;
     private LocalDateTime transactionDate;
     private LocalDateTime importDate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User idUser;
 
 }
