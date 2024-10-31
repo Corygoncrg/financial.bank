@@ -17,6 +17,7 @@ public class User {
     @Column(name = "username")
     private String name;
     private String email;
+    private String status;
 
 
 

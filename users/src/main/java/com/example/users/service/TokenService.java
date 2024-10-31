@@ -39,7 +39,7 @@ public class TokenService {
     }
 
     /**
-     * Method to very tokenJWT
+     * Method to verify tokenJWT
      * @param tokenJWT String which contains a tokenJWT
      * @return String
      */

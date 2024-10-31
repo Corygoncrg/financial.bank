@@ -59,8 +59,9 @@ public class SpringBatchConfig {
 
     @Bean
     @StepScope
-    public ItemProcessor<TransactionCsvRecord, TransactionCsv> processor(@Value("#{stepExecution.jobExecution.createTime}") LocalDateTime importDate) {
-        return csvRecord -> csvService.processRecord(csvRecord, importDate);
+    public ItemProcessor<TransactionCsvRecord, TransactionCsv> processor(@Value("#{stepExecution.jobExecution.createTime}") LocalDateTime importDate,
+                                                                         @Value("#{jobParameters[userId]}") Long userId) {
+        return csvRecord -> csvService.processRecord(csvRecord, importDate, userId);
     }
 
     @Bean

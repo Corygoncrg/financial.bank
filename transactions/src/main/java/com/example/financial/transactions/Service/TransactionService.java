@@ -1,5 +1,6 @@
 package com.example.financial.transactions.Service;
 
+import com.example.financial.transactions.config.KafkaResponseHandler;
 import com.example.financial.transactions.model.TransactionAdapter;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
@@ -10,8 +11,7 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +33,13 @@ public class TransactionService {
 
     @Autowired
     private CsvParserService csvParserService;
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+
+    @Autowired
+    private KafkaResponseHandler responseHandler;
 
     public Resource getResourceResponseEntity(String filename, StorageService storageService) {
         return storageService.loadAsResource(filename);
@@ -57,11 +65,30 @@ public class TransactionService {
         return transactions.stream().map(TransactionAdapter::transactionCsvToRecordAdapter).collect(Collectors.toList());
     }
 
-    public void csvFileUpload(MultipartFile csvFile, String userId, RedirectAttributes redirectAttributes, JobLauncher jobLauncher, Job importTransactionJob, StorageService storageService) {
-        String filename = storageService.store(csvFile);
+    public void csvFileUpload(MultipartFile csvFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher, Job importTransactionJob, StorageService storageService) {
+        kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
+        Long userId;
+        try {
+            // Wait for the user ID from Kafka with a timeout
+            if (responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
+                userId = responseHandler.getUserId();
 
+                if (userId == null) {
+                    throw new RuntimeException("User ID retrieval failed: received null");
+                }
+            } else {
+                throw new RuntimeException("Timeout while waiting for user ID from Kafka");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("message", "Failed to retrieve user ID: " + e.getMessage());
+            return; // Exit the method if user ID could not be retrieved
+        }
+
+        String filename = storageService.store(csvFile);
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("filename", filename)
+                .addLong("userId", userId)
                 .addLong("time", System.currentTimeMillis())  // Use time to ensure uniqueness
                 .toJobParameters();
 
@@ -73,4 +100,6 @@ public class TransactionService {
             redirectAttributes.addFlashAttribute("message", "Failed to process file: " + e.getMessage());
         }
     }
+
+
 }

@@ -11,7 +11,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -20,14 +19,14 @@ import java.io.IOException;
 import java.util.List;
 
 @Controller
-public class FinancialTransactionController {
+public class TransactionController {
 
     private final StorageService storageService;
     private final JobLauncher jobLauncher;
     private final Job importTransactionJob;
 
     @Autowired
-    public FinancialTransactionController(StorageService storageService, JobLauncher jobLauncher, Job importTransactionJob) {
+    public TransactionController(StorageService storageService, JobLauncher jobLauncher, Job importTransactionJob) {
         this.storageService = storageService;
         this.jobLauncher = jobLauncher;
         this.importTransactionJob = importTransactionJob;
@@ -60,8 +59,8 @@ public class FinancialTransactionController {
     }
 
     @PostMapping("/")
-    public String handleCsvFileUpload(@RequestParam("file") MultipartFile csvFile, @RequestParam("userId") String userId, RedirectAttributes redirectAttributes) {
-        transactionService.csvFileUpload(csvFile, userId, redirectAttributes, jobLauncher, importTransactionJob, storageService);
+    public String handleCsvFileUpload(@RequestParam("file") MultipartFile csvFile, @RequestParam("token") String token, RedirectAttributes redirectAttributes) {
+        transactionService.csvFileUpload(csvFile, token, redirectAttributes, jobLauncher, importTransactionJob, storageService);
         return "redirect:/";
     }
 

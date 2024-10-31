@@ -18,7 +18,7 @@ public class TransactionCsvService {
 
     private LocalDateTime firstTransactionDate = null;
 
-    public TransactionCsv processRecord(TransactionCsvRecord csvRecord, LocalDateTime importDate) {
+    public TransactionCsv processRecord(TransactionCsvRecord csvRecord, LocalDateTime importDate, Long userId) {
         LocalDateTime currentTransactionTime = csvRecord.getTransactionDate();
 
         if (firstTransactionDate == null) {
@@ -33,6 +33,7 @@ public class TransactionCsvService {
                 return null;  // Skip the record if it's a duplicate
             }
             System.out.println("Processing transaction with date: " + currentTransactionTime);
+
 
 //TODO: using the token that is necessary to access the page
 // extract the user ID and insert into the csvRecord so that it can be saved in the database
