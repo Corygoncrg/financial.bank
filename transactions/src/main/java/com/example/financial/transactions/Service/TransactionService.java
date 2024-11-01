@@ -1,6 +1,6 @@
 package com.example.financial.transactions.Service;
 
-import com.example.financial.transactions.config.KafkaResponseHandler;
+import com.example.financial.transactions.kafka.KafkaResponseHandler;
 import com.example.financial.transactions.model.TransactionAdapter;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
@@ -71,7 +71,7 @@ public class TransactionService {
         try {
             // Wait for the user ID from Kafka with a timeout
             if (responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
-                userId = responseHandler.getUserId();
+                userId = responseHandler.getUserDto().id();
 
                 if (userId == null) {
                     throw new RuntimeException("User ID retrieval failed: received null");
@@ -91,7 +91,6 @@ public class TransactionService {
                 .addLong("userId", userId)
                 .addLong("time", System.currentTimeMillis())  // Use time to ensure uniqueness
                 .toJobParameters();
-
         try {
             jobLauncher.run(importTransactionJob, jobParameters);
             redirectAttributes.addFlashAttribute("message", "Successfully uploaded and processed " + csvFile.getOriginalFilename() + "!");

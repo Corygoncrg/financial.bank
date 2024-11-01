@@ -1,9 +1,9 @@
-package com.example.users.config;
+package com.example.users.kafka;
 
+import com.example.users.dto.user.UserDto;
 import com.example.users.repository.UserRepository;
 import com.example.users.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class KafkaConsumer {
 
     @Autowired
-    private KafkaTemplate<String, Long> kafkaTemplate;
+    private KafkaTemplate<String, UserDto> kafkaTemplate;
 
     @Autowired
     private TokenService tokenService;
@@ -26,8 +26,8 @@ public class KafkaConsumer {
         var user = repository.findByName(userId);
 
         // Send the user ID back to `financial.transactions`
-        kafkaTemplate.send("FINANCIAL_BANK_USERS", user.getId());
+        var userDto = new UserDto(user);
+        kafkaTemplate.send("FINANCIAL_BANK_USERS", userDto);
     }
-
 
 }

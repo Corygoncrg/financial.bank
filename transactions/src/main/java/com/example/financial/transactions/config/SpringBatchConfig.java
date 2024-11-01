@@ -2,6 +2,7 @@ package com.example.financial.transactions.config;
 
 import com.example.financial.transactions.Service.TransactionCsvService;
 import com.example.financial.transactions.Service.LineMapperService;
+import com.example.financial.transactions.dto.UserDto;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
 import org.springframework.batch.core.Job;
@@ -60,8 +61,8 @@ public class SpringBatchConfig {
     @Bean
     @StepScope
     public ItemProcessor<TransactionCsvRecord, TransactionCsv> processor(@Value("#{stepExecution.jobExecution.createTime}") LocalDateTime importDate,
-                                                                         @Value("#{jobParameters[userId]}") Long userId) {
-        return csvRecord -> csvService.processRecord(csvRecord, importDate, userId);
+                                                                         @Value("#{jobParameters[userDto]}") UserDto dto) {
+        return csvRecord -> csvService.processRecord(csvRecord, importDate, dto);
     }
 
     @Bean

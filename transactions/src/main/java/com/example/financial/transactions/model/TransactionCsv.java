@@ -27,7 +27,7 @@ public class TransactionCsv {
     private LocalDateTime transactionDate;
     private LocalDateTime importDate;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "id_user")
     private User idUser;
 
 }

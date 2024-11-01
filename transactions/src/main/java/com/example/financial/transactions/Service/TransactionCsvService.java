@@ -1,7 +1,9 @@
 package com.example.financial.transactions.Service;
 
+import com.example.financial.transactions.dto.UserDto;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
+import com.example.financial.transactions.model.User;
 import com.example.financial.transactions.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ public class TransactionCsvService {
 
     private LocalDateTime firstTransactionDate = null;
 
-    public TransactionCsv processRecord(TransactionCsvRecord csvRecord, LocalDateTime importDate, Long userId) {
+    public TransactionCsv processRecord(TransactionCsvRecord csvRecord, LocalDateTime importDate, UserDto dto) {
         LocalDateTime currentTransactionTime = csvRecord.getTransactionDate();
 
         if (firstTransactionDate == null) {
@@ -35,9 +37,10 @@ public class TransactionCsvService {
             System.out.println("Processing transaction with date: " + currentTransactionTime);
 
 
-//TODO: using the token that is necessary to access the page
-// extract the user ID and insert into the csvRecord so that it can be saved in the database
-
+            //TODO: using the token that is necessary to access the page
+            // extract the user ID and insert into the csvRecord so that it can be saved in the database
+            //
+            csvRecord.setIdUser(new User(dto));
             return transactionRecordToCsvAdapter(csvRecord, importDate);
         } else {
             System.out.println("Skipping transaction with date: " + currentTransactionTime);

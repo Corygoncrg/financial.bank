@@ -1,4 +1,4 @@
-package com.example.financial.transactions.config;
+package com.example.financial.transactions.kafka;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
