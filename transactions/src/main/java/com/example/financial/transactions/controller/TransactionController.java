@@ -4,6 +4,7 @@ import com.example.financial.transactions.Service.StorageService;
 import com.example.financial.transactions.Service.TransactionService;
 import com.example.financial.transactions.exception.StorageFileNotFoundException;
 import com.example.financial.transactions.model.TransactionCsvRecord;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class TransactionController {
     }
 
     @PostMapping("/")
-    public String handleCsvFileUpload(@RequestParam("file") MultipartFile csvFile, @RequestParam("token") String token, RedirectAttributes redirectAttributes) {
+    public String handleCsvFileUpload(@RequestParam("file") MultipartFile csvFile, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
         transactionService.csvFileUpload(csvFile, token, redirectAttributes, jobLauncher, importTransactionJob, storageService);
         return "redirect:/";
     }

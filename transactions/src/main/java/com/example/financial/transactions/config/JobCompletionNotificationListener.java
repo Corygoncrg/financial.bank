@@ -1,5 +1,6 @@
 package com.example.financial.transactions.config;
 
+import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

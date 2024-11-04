@@ -5,6 +5,8 @@ import com.example.financial.transactions.Service.LineMapperService;
 import com.example.financial.transactions.dto.UserDto;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -61,7 +63,8 @@ public class SpringBatchConfig {
     @Bean
     @StepScope
     public ItemProcessor<TransactionCsvRecord, TransactionCsv> processor(@Value("#{stepExecution.jobExecution.createTime}") LocalDateTime importDate,
-                                                                         @Value("#{jobParameters[userDto]}") UserDto dto) {
+                                                                         @Value("#{jobParameters['userDto']}") String userDtoJson) throws JsonProcessingException {
+        UserDto dto = new ObjectMapper().readValue(userDtoJson, UserDto.class);
         return csvRecord -> csvService.processRecord(csvRecord, importDate, dto);
     }
 

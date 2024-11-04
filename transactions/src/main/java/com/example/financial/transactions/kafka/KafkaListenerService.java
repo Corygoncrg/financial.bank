@@ -13,7 +13,7 @@ public class KafkaListenerService {
 
     @KafkaListener(topics = "FINANCIAL_BANK_USERS", groupId = "transactions-group")
     public void listen(UserDto userDto) {
-        System.out.println("Received User ID from Kafka: " + userDto);
+        System.out.println("Received User from Kafka: " + userDto);
         responseHandler.setUserDto(userDto);
     }
 }

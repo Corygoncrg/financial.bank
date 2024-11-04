@@ -30,4 +30,8 @@ public class TransactionCsv {
     @JoinColumn(name = "id_user")
     private User idUser;
 
+    public Long getUserId() {
+        return idUser != null ? idUser.getId() : null;
+    }
+
 }

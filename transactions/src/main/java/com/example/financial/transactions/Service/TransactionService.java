@@ -5,6 +5,8 @@ import com.example.financial.transactions.model.TransactionAdapter;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
 import com.example.financial.transactions.repository.TransactionRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -65,7 +67,8 @@ public class TransactionService {
         return transactions.stream().map(TransactionAdapter::transactionCsvToRecordAdapter).collect(Collectors.toList());
     }
 
-    public void csvFileUpload(MultipartFile csvFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher, Job importTransactionJob, StorageService storageService) {
+    public void csvFileUpload(MultipartFile csvFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher,
+                              Job importTransactionJob, StorageService storageService) throws JsonProcessingException {
         kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
         Long userId;
         try {
@@ -84,11 +87,12 @@ public class TransactionService {
             redirectAttributes.addFlashAttribute("message", "Failed to retrieve user ID: " + e.getMessage());
             return; // Exit the method if user ID could not be retrieved
         }
-
+        var userDto = responseHandler.getUserDto();
+        ObjectMapper objectMapper = new ObjectMapper();
         String filename = storageService.store(csvFile);
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("filename", filename)
-                .addLong("userId", userId)
+                .addString("userDto", objectMapper.writeValueAsString(userDto))
                 .addLong("time", System.currentTimeMillis())  // Use time to ensure uniqueness
                 .toJobParameters();
         try {
