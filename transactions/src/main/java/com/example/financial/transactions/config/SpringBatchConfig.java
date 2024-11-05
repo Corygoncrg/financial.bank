@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 import java.time.LocalDateTime;
 
 import static com.example.financial.transactions.Service.SqlService.*;
+import static com.example.financial.transactions.config.StorageProperties.uploadDirLocation;
 
 @Configuration
 @EnableBatchProcessing
@@ -52,7 +53,7 @@ public class SpringBatchConfig {
     public FlatFileItemReader<TransactionCsvRecord> reader(@Value("#{jobParameters[filename]}") String filename) {
         return new FlatFileItemReaderBuilder<TransactionCsvRecord>()
                 .name("transactionItemReader")
-                .resource(new FileSystemResource("upload-dir/" + filename))
+                .resource(new FileSystemResource( uploadDirLocation + "/" + filename))
                 .delimited()
                 .names(listFields)
                 .targetType(TransactionCsvRecord.class)

@@ -2,6 +2,7 @@ package com.example.financial.transactions.controller;
 
 import com.example.financial.transactions.Service.StorageService;
 import com.example.financial.transactions.Service.TransactionService;
+import com.example.financial.transactions.dto.TransactionCsvDto;
 import com.example.financial.transactions.exception.StorageFileNotFoundException;
 import com.example.financial.transactions.model.TransactionCsvRecord;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,7 +55,7 @@ public class TransactionController {
 
     @GetMapping("/transactions")
     @ResponseBody
-    public List<TransactionCsvRecord> getTransactions() throws IOException {
+    public List<TransactionCsvDto> getTransactions() throws IOException {
         // Return a list of transactions with `transaction_date` and `import_date`
         return transactionService.getTransactionsFromFiles(storageService);
     }

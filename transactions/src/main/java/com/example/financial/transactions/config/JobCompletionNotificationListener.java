@@ -1,5 +1,6 @@
 package com.example.financial.transactions.config;
 
+import com.example.financial.transactions.dto.TransactionCsvDto;
 import com.example.financial.transactions.model.TransactionCsv;
 import com.example.financial.transactions.model.TransactionCsvRecord;
 import org.slf4j.Logger;
@@ -33,8 +34,9 @@ public class JobCompletionNotificationListener implements JobExecutionListener {
             log.info("!!! JOB FINISHED! Time to verify the results" + jobExecution.getCreateTime());
 
             jdbcTemplate
-                    .query("SELECT " + allFields + " FROM transactions", new DataClassRowMapper<>(TransactionCsvRecord.class))
+                    .query("SELECT " + allFields + " FROM transactions", new DataClassRowMapper<>(TransactionCsvDto.class))
                     .forEach(transaction -> log.info("Found <{{}}> in the database.", transaction));
+
         }
     }
 

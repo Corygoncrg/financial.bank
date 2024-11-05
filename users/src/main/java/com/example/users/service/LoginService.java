@@ -3,6 +3,7 @@ package com.example.users.service;
 import com.example.users.dto.authentication.AuthenticationDTO;
 import com.example.users.dto.authentication.TokenJWTDTO;
 import com.example.users.model.User;
+import com.example.users.model.UserStatus;
 import com.example.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,10 @@ public class LoginService {
      */
     public TokenJWTDTO login(AuthenticationDTO dto) {
     var authenticationToken = new UsernamePasswordAuthenticationToken(dto.user(), dto.password());
+    var user = userRepository.findByName(authenticationToken.getName());
+    if (user.getStatus() == UserStatus.NOT_ACTIVE) {
+        return null;
+    }
     var authentication = manager.authenticate(authenticationToken);
     var tokenJWT = tokenService.createToken((User) authentication.getPrincipal());
         return new TokenJWTDTO(tokenJWT);

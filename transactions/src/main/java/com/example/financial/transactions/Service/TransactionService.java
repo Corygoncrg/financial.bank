@@ -1,5 +1,6 @@
 package com.example.financial.transactions.Service;
 
+import com.example.financial.transactions.dto.TransactionCsvDto;
 import com.example.financial.transactions.kafka.KafkaResponseHandler;
 import com.example.financial.transactions.model.TransactionAdapter;
 import com.example.financial.transactions.model.TransactionCsv;
@@ -47,7 +48,7 @@ public class TransactionService {
         return storageService.loadAsResource(filename);
     }
 
-    public List<TransactionCsvRecord> getTransactionsFromFiles(StorageService storageService) throws IOException {
+    public List<TransactionCsvDto> getTransactionsFromFiles(StorageService storageService) throws IOException {
         List<String> fileNames = storageService.loadAll()
                 .map(Path::toString)
                 .toList();
@@ -63,8 +64,9 @@ public class TransactionService {
         // Query the database for transactions with matching dates
         List<TransactionCsv> transactions = repository.findByTransactionDateIn(transactionDates);
 
+
         // Map TransactionCsv to TransactionCsvRecord
-        return transactions.stream().map(TransactionAdapter::transactionCsvToRecordAdapter).collect(Collectors.toList());
+        return transactions.stream().map(TransactionCsvDto::from).collect(Collectors.toList());
     }
 
     public void csvFileUpload(MultipartFile csvFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher,

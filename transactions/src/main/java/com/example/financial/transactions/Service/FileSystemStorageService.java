@@ -10,7 +10,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.example.financial.transactions.config.StorageProperties;
 import com.example.financial.transactions.exception.StorageException;
 import com.example.financial.transactions.exception.StorageFileNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +20,20 @@ import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.example.financial.transactions.config.StorageProperties.uploadDirLocation;
+
 @Service
 public class FileSystemStorageService implements StorageService {
 
 	private final Path rootLocation;
-
 	@Autowired
-	public FileSystemStorageService(StorageProperties properties) {
+	public FileSystemStorageService() {
 
-        if(properties.getLocation().trim().length() == 0){
+        if(uploadDirLocation.trim().isEmpty()){
             throw new StorageException("File upload location can not be Empty.");
         }
 
-		this.rootLocation = Paths.get(properties.getLocation());
+		this.rootLocation = Paths.get(uploadDirLocation);
 	}
 
 	@Override

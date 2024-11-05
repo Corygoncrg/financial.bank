@@ -1,5 +1,7 @@
 package com.example.financial.transactions.model;
 
+import com.example.financial.transactions.dto.TransactionCsvDto;
+
 import java.time.LocalDateTime;
 
 public class TransactionAdapter {
@@ -33,4 +35,5 @@ public class TransactionAdapter {
         record.setIdUser(transaction.getIdUser());
         return record;
     }
+
 }

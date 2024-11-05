@@ -38,9 +38,9 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<String> register(@ModelAttribute @Valid UserRegisterDto dto) {
-        boolean isRegistered = service.register(dto);
+        boolean isNotRegistered = service.register(dto);
 
-        if (isRegistered) {
+        if (isNotRegistered) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("User with this username or email already exists!");
@@ -69,14 +69,19 @@ public class UserController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<TokenJWTDTO> login(@RequestBody @Valid AuthenticationDTO dto) {
+    public ResponseEntity<?> login(@RequestBody @Valid AuthenticationDTO dto) {
         var token = loginService.login(dto);
-        System.out.println(token);
-        return ResponseEntity.ok(token);
+        if (token != null) {
+            System.out.println(token);
+            return ResponseEntity.ok(token);
+        }
+        return ResponseEntity.badRequest().body("User is not longer active!");
     }
 
     @GetMapping("verify/{uuid}")
     public ResponseEntity<String> verifyUser(@PathVariable String uuid) {
+        //TODO: When the user receives the email, there's a link that he can click to go on the site, and insert
+        // the validation key to validate his account
         VerifyUserResult result = service.verifyUser(uuid);
 
         return switch (result){
