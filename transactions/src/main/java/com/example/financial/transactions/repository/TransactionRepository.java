@@ -15,4 +15,5 @@ public interface TransactionRepository extends JpaRepository <TransactionCsv, Lo
 
     List<TransactionCsv> findByTransactionDateIn(Set<LocalDateTime> transactionDates);
 
+    List<TransactionCsv> findByImportDate(@Param("import_date") LocalDateTime importDate);
 }

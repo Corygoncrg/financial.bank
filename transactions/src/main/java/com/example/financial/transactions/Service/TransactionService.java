@@ -2,9 +2,8 @@ package com.example.financial.transactions.Service;
 
 import com.example.financial.transactions.dto.TransactionCsvDto;
 import com.example.financial.transactions.kafka.KafkaResponseHandler;
-import com.example.financial.transactions.model.TransactionAdapter;
+import com.example.financial.transactions.model.LocalDateTimeEditor;
 import com.example.financial.transactions.model.TransactionCsv;
-import com.example.financial.transactions.model.TransactionCsvRecord;
 import com.example.financial.transactions.repository.TransactionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +12,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.core.io.Resource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -39,6 +39,13 @@ public class TransactionService {
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
+
+    private final LocalDateTimeEditor localDateTimeEditor;
+
+    @Autowired
+    public TransactionService() {
+        this.localDateTimeEditor = new LocalDateTimeEditor("yyyy-MM-dd'T'HH:mm:ss");  // Customize the pattern based on your CSV data format
+    }
 
 
     @Autowired
@@ -107,4 +114,10 @@ public class TransactionService {
     }
 
 
+    public List<TransactionCsvDto> getTransactionsByImportDate(String importDate) {
+        localDateTimeEditor.setAsText(importDate);
+        LocalDateTime localDateTime = (LocalDateTime) localDateTimeEditor.getValue();
+        var transactions = repository.findByImportDate(localDateTime);
+        return transactions.stream().map(TransactionCsvDto::from).collect(Collectors.toList());
+    }
 }

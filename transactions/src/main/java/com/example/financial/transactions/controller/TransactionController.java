@@ -4,7 +4,6 @@ import com.example.financial.transactions.Service.StorageService;
 import com.example.financial.transactions.Service.TransactionService;
 import com.example.financial.transactions.dto.TransactionCsvDto;
 import com.example.financial.transactions.exception.StorageFileNotFoundException;
-import com.example.financial.transactions.model.TransactionCsvRecord;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -18,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -58,6 +58,13 @@ public class TransactionController {
     public List<TransactionCsvDto> getTransactions() throws IOException {
         // Return a list of transactions with `transaction_date` and `import_date`
         return transactionService.getTransactionsFromFiles(storageService);
+    }
+
+    @GetMapping("/transactions/details/{importDate}")
+    @ResponseBody
+    public List<TransactionCsvDto> DetailTransaction(@PathVariable String importDate) throws IOException {
+        // Return a list of transactions with `transaction_date` and `import_date`
+        return transactionService.getTransactionsByImportDate(importDate);
     }
 
     @PostMapping("/")
