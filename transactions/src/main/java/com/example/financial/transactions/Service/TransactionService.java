@@ -1,5 +1,7 @@
 package com.example.financial.transactions.Service;
 
+import com.example.financial.transactions.dto.AccountDto;
+import com.example.financial.transactions.dto.AgencyDto;
 import com.example.financial.transactions.dto.TransactionCsvDto;
 import com.example.financial.transactions.kafka.KafkaResponseHandler;
 import com.example.financial.transactions.model.LocalDateTimeEditor;
@@ -12,7 +14,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.core.io.Resource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -120,4 +121,22 @@ public class TransactionService {
         var transactions = repository.findByImportDate(localDateTime);
         return transactions.stream().map(TransactionCsvDto::from).collect(Collectors.toList());
     }
+
+    public List<TransactionCsvDto> getSuspectTransactionsByYearAndMonth(int year, int month) {
+        var transactions = repository.findSuspectTransactionsByYearAndMonth(year, month);
+
+        return transactions.stream().map(TransactionCsvDto::from).collect(Collectors.toList());
+    }
+
+    public List<AccountDto> getSuspectAccountsByYearAndMonth(int year, int month) {
+        List<Object[]> results = repository.findSuspectAccountsByYearAndMonth(year, month);
+        return results.stream().map(AccountDto::from).collect(Collectors.toList());
+    }
+
+    public List<AgencyDto> getSuspectAgenciesByYearAndMonth(int year, int month) {
+        List<Object[]> results = repository.findSuspectAgenciesByYearAndMonth(year, month);
+        return results.stream().map(AgencyDto::from).collect(Collectors.toList());
+    }
+
+
 }
