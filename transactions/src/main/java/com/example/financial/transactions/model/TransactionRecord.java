@@ -1,6 +1,9 @@
 package com.example.financial.transactions.model;
 
-import jakarta.persistence.*;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,14 +12,10 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-@Entity(name = "Transaction")
-@Table(name = "transactions")
-public class TransactionCsv {
+@XmlRootElement(name = "transaction")
+@XmlAccessorType(XmlAccessType.FIELD)
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class TransactionRecord {
     private String originalBank;
     private String originalAgency;
     private String originalAccount;
@@ -24,14 +23,8 @@ public class TransactionCsv {
     private String destinyAgency;
     private String destinyAccount;
     private BigDecimal amount;
+    @XmlElement(name = "data")
     private LocalDateTime transactionDate;
     private LocalDateTime importDate;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_user")
     private User idUser;
-
-    public Long getUserId() {
-        return idUser != null ? idUser.getId() : null;
-    }
-
 }

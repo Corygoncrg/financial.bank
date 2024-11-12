@@ -1,7 +1,7 @@
 package com.example.financial.transactions.Service;
 
 import com.example.financial.transactions.model.LocalDateTimeEditor;
-import com.example.financial.transactions.model.TransactionCsvRecord;
+import com.example.financial.transactions.model.TransactionRecord;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
@@ -17,16 +17,16 @@ import static com.example.financial.transactions.Service.SqlService.listFields;
 public class LineMapperService {
 
 
-    public LineMapper<TransactionCsvRecord> lineMapper() {
-        DefaultLineMapper<TransactionCsvRecord> lineMapper = new DefaultLineMapper<>();
+    public LineMapper<TransactionRecord> lineMapper() {
+        DefaultLineMapper<TransactionRecord> lineMapper = new DefaultLineMapper<>();
 
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
         lineTokenizer.setStrict(false);
         lineTokenizer.setNames(listFields);
 
-        BeanWrapperFieldSetMapper<TransactionCsvRecord> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
-        fieldSetMapper.setTargetType(TransactionCsvRecord.class);
+        BeanWrapperFieldSetMapper<TransactionRecord> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper.setTargetType(TransactionRecord.class);
 
         fieldSetMapper.setCustomEditors(Collections.singletonMap(
                 LocalDateTime.class, new LocalDateTimeEditor("yyyy-MM-dd'T'HH:mm:ss")

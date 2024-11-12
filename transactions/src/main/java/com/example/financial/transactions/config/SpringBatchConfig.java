@@ -1,10 +1,10 @@
 package com.example.financial.transactions.config;
 
-import com.example.financial.transactions.Service.TransactionCsvService;
+import com.example.financial.transactions.Service.TransactionBatchService;
 import com.example.financial.transactions.Service.LineMapperService;
 import com.example.financial.transactions.dto.UserDto;
-import com.example.financial.transactions.model.TransactionCsv;
-import com.example.financial.transactions.model.TransactionCsvRecord;
+import com.example.financial.transactions.model.Transaction;
+import com.example.financial.transactions.model.TransactionRecord;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.batch.core.Job;
@@ -19,12 +19,14 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import javax.sql.DataSource;
 
@@ -41,7 +43,7 @@ public class SpringBatchConfig {
     private LineMapperService lineMapperService;
 
     @Autowired
-    private TransactionCsvService csvService;
+    private TransactionBatchService batchService;
 
     @Bean
     public DataSourceTransactionManager transactionManager(DataSource dataSource) {
@@ -50,28 +52,28 @@ public class SpringBatchConfig {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<TransactionCsvRecord> reader(@Value("#{jobParameters[filename]}") String filename) {
-        return new FlatFileItemReaderBuilder<TransactionCsvRecord>()
+    public FlatFileItemReader<TransactionRecord> reader(@Value("#{jobParameters[filename]}") String filename) {
+        return new FlatFileItemReaderBuilder<TransactionRecord>()
                 .name("transactionItemReader")
                 .resource(new FileSystemResource( uploadDirLocation + "/" + filename))
                 .delimited()
                 .names(listFields)
-                .targetType(TransactionCsvRecord.class)
+                .targetType(TransactionRecord.class)
                 .lineMapper(lineMapperService.lineMapper())
                 .build();
     }
 
     @Bean
     @StepScope
-    public ItemProcessor<TransactionCsvRecord, TransactionCsv> processor(@Value("#{stepExecution.jobExecution.createTime}") LocalDateTime importDate,
-                                                                         @Value("#{jobParameters['userDto']}") String userDtoJson) throws JsonProcessingException {
+    public ItemProcessor<TransactionRecord, Transaction> processor(@Value("#{stepExecution.jobExecution.createTime}") LocalDateTime importDate,
+                                                                   @Value("#{jobParameters['userDto']}") String userDtoJson) throws JsonProcessingException {
         UserDto dto = new ObjectMapper().readValue(userDtoJson, UserDto.class);
-        return csvRecord -> csvService.processRecord(csvRecord, importDate, dto);
+        return csvRecord -> batchService.processRecord(csvRecord, importDate, dto);
     }
 
     @Bean
-    public JdbcBatchItemWriter<TransactionCsv> writer(DataSource dataSource) {
-        return new JdbcBatchItemWriterBuilder<TransactionCsv>()
+    public JdbcBatchItemWriter<Transaction> writer(DataSource dataSource) {
+        return new JdbcBatchItemWriterBuilder<Transaction>()
                 .sql("INSERT INTO transactions (" + allFields + ") VALUES (" + allJavaFields +")")
                 .dataSource(dataSource)
                 .beanMapped()
@@ -89,12 +91,48 @@ public class SpringBatchConfig {
     @Bean
     public Step step1(JobRepository jobRepository,
                       DataSourceTransactionManager transactionManager,
-                      FlatFileItemReader<TransactionCsvRecord> reader,
-                      JdbcBatchItemWriter<TransactionCsv> writer,
-                      ItemProcessor<TransactionCsvRecord, TransactionCsv> processor) {
+                      FlatFileItemReader<TransactionRecord> reader,
+                      JdbcBatchItemWriter<Transaction> writer,
+                      ItemProcessor<TransactionRecord, Transaction> processor) {
         return new StepBuilder("step1", jobRepository)
-                .<TransactionCsvRecord, TransactionCsv>chunk(3, transactionManager)
+                .<TransactionRecord, Transaction>chunk(3, transactionManager)
                 .reader(reader)
+                .processor(processor)
+                .writer(writer)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public StaxEventItemReader<TransactionRecord> xmlReader(@Value("#{jobParameters['filename']}") String filename) {
+        StaxEventItemReader<TransactionRecord> reader = new StaxEventItemReader<>();
+        reader.setResource(new FileSystemResource(uploadDirLocation + "/" + filename));
+        reader.setFragmentRootElementName("transaction");  // Root element of each record in the XML
+
+        Jaxb2Marshaller unmarshaller = new Jaxb2Marshaller();
+        unmarshaller.setClassesToBeBound(TransactionRecord.class);
+        reader.setUnmarshaller(unmarshaller);
+
+        return reader;
+    }
+
+    @Bean
+    public Job importTransactionJobXml(JobRepository repository, Step stepXml, JobCompletionNotificationListener listener) {
+        return new JobBuilder("importTransactionJobXml", repository)
+                .listener(listener)
+                .start(stepXml)
+                .build();
+    }
+
+    @Bean
+    public Step stepXml(JobRepository jobRepository,
+                        DataSourceTransactionManager transactionManager,
+                        StaxEventItemReader<TransactionRecord> xmlReader,
+                        JdbcBatchItemWriter<Transaction> writer,
+                        ItemProcessor<TransactionRecord, Transaction> processor) {
+        return new StepBuilder("stepXml", jobRepository)
+                .<TransactionRecord, Transaction>chunk(3, transactionManager)
+                .reader(xmlReader)
                 .processor(processor)
                 .writer(writer)
                 .build();

@@ -1,5 +1,6 @@
 package com.example.financial.transactions.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,7 +9,14 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class TransactionCsvRecord {
+@Entity(name = "Transaction")
+@Table(name = "transactions")
+public class Transaction {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String originalBank;
     private String originalAgency;
     private String originalAccount;
@@ -18,5 +26,12 @@ public class TransactionCsvRecord {
     private BigDecimal amount;
     private LocalDateTime transactionDate;
     private LocalDateTime importDate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_user")
     private User idUser;
+
+    public Long getUserId() {
+        return idUser != null ? idUser.getId() : null;
+    }
+
 }

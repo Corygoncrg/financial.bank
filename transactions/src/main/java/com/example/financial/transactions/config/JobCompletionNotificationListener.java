@@ -1,20 +1,14 @@
 package com.example.financial.transactions.config;
 
-import com.example.financial.transactions.dto.TransactionCsvDto;
-import com.example.financial.transactions.model.TransactionCsv;
-import com.example.financial.transactions.model.TransactionCsvRecord;
+import com.example.financial.transactions.dto.TransactionDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.cglib.core.Local;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 import static com.example.financial.transactions.Service.SqlService.allFields;
 
@@ -34,7 +28,7 @@ public class JobCompletionNotificationListener implements JobExecutionListener {
             log.info("!!! JOB FINISHED! Time to verify the results" + jobExecution.getCreateTime());
 
             jdbcTemplate
-                    .query("SELECT " + allFields + " FROM transactions", new DataClassRowMapper<>(TransactionCsvDto.class))
+                    .query("SELECT " + allFields + " FROM transactions", new DataClassRowMapper<>(TransactionDto.class))
                     .forEach(transaction -> log.info("Found <{{}}> in the database.", transaction));
 
         }

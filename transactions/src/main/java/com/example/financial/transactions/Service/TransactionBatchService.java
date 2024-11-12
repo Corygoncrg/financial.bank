@@ -1,8 +1,8 @@
 package com.example.financial.transactions.Service;
 
 import com.example.financial.transactions.dto.UserDto;
-import com.example.financial.transactions.model.TransactionCsv;
-import com.example.financial.transactions.model.TransactionCsvRecord;
+import com.example.financial.transactions.model.Transaction;
+import com.example.financial.transactions.model.TransactionRecord;
 import com.example.financial.transactions.model.User;
 import com.example.financial.transactions.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,18 +10,18 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-import static com.example.financial.transactions.model.TransactionAdapter.transactionRecordToCsvAdapter;
+import static com.example.financial.transactions.model.TransactionAdapter.transactionRecordToTransactionAdapter;
 
 @Service
-public class TransactionCsvService {
+public class TransactionBatchService {
 
     @Autowired
     private TransactionRepository repository;
 
     private LocalDateTime firstTransactionDate = null;
 
-    public TransactionCsv processRecord(TransactionCsvRecord csvRecord, LocalDateTime importDate, UserDto dto) {
-        LocalDateTime currentTransactionTime = csvRecord.getTransactionDate();
+    public Transaction processRecord(TransactionRecord record, LocalDateTime importDate, UserDto dto) {
+        LocalDateTime currentTransactionTime = record.getTransactionDate();
 
         if (firstTransactionDate == null) {
             firstTransactionDate = currentTransactionTime;
@@ -38,8 +38,8 @@ public class TransactionCsvService {
 
 
             
-            csvRecord.setIdUser(new User(dto));
-            return transactionRecordToCsvAdapter(csvRecord, importDate);
+            record.setIdUser(new User(dto));
+            return transactionRecordToTransactionAdapter(record, importDate);
         } else {
             System.out.println("Skipping transaction with date: " + currentTransactionTime);
         }

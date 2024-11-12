@@ -4,12 +4,14 @@ import com.example.financial.transactions.Service.StorageService;
 import com.example.financial.transactions.Service.TransactionService;
 import com.example.financial.transactions.dto.AccountDto;
 import com.example.financial.transactions.dto.AgencyDto;
-import com.example.financial.transactions.dto.TransactionCsvDto;
+import com.example.financial.transactions.dto.TransactionDto;
 import com.example.financial.transactions.exception.StorageFileNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -19,23 +21,23 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 public class TransactionController {
 
     private final StorageService storageService;
     private final JobLauncher jobLauncher;
-    private final Job importTransactionJob;
+    private final Job importTransactionJobCsv;
+    private final Job importTransactionJobXml;
 
     @Autowired
-    public TransactionController(StorageService storageService, JobLauncher jobLauncher, Job importTransactionJob) {
+    public TransactionController(StorageService storageService, JobLauncher jobLauncher, @Qualifier("importTransactionJob") Job importTransactionJobCsv,
+                                 @Qualifier("importTransactionJobXml") Job importTransactionJobXml) {
         this.storageService = storageService;
         this.jobLauncher = jobLauncher;
-        this.importTransactionJob = importTransactionJob;
+        this.importTransactionJobCsv = importTransactionJobCsv;
+        this.importTransactionJobXml = importTransactionJobXml;
     }
 
     @Autowired
@@ -54,21 +56,21 @@ public class TransactionController {
 
     @GetMapping("/transactions")
     @ResponseBody
-    public List<TransactionCsvDto> getTransactions() throws IOException {
+    public List<TransactionDto> getTransactions() throws IOException {
         // Return a list of transactions with `transaction_date` and `import_date`
         return transactionService.getTransactionsFromFiles(storageService);
     }
 
     @GetMapping("/transactions/details/{importDate}")
     @ResponseBody
-    public List<TransactionCsvDto> detailTransaction(@PathVariable String importDate) {
+    public List<TransactionDto> detailTransaction(@PathVariable String importDate) {
         // Return a list of transactions with `transaction_date` and `import_date`
         return transactionService.getTransactionsByImportDate(importDate);
     }
 
     @GetMapping("/transactions/analyses/{year}/{month}")
     @ResponseBody
-    public List<TransactionCsvDto> listSuspectTransactions(@PathVariable int year, @PathVariable int month) {
+    public List<TransactionDto> listSuspectTransactions(@PathVariable int year, @PathVariable int month) {
         return transactionService.getSuspectTransactionsByYearAndMonth(year, month);
     }
 
@@ -85,9 +87,18 @@ public class TransactionController {
     }
 
     @PostMapping("/")
-    public String handleCsvFileUpload(@RequestParam("file") MultipartFile csvFile, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
-        transactionService.csvFileUpload(csvFile, token, redirectAttributes, jobLauncher, importTransactionJob, storageService);
-        return "redirect:/";
+    public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
+        //TODO: Make it so that it can accept XML file uploads as well
+        String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if ("csv".equalsIgnoreCase(fileExtension)) {
+            transactionService.csvFileUpload(file, token, redirectAttributes, jobLauncher, importTransactionJobCsv, storageService);
+        } else if ("xml".equalsIgnoreCase(fileExtension)) {
+            transactionService.xmlFileUpload(file, token, redirectAttributes, jobLauncher, importTransactionJobXml, storageService);
+        } else {
+            redirectAttributes.addFlashAttribute("message", "Unsupported file type: " + fileExtension);
+            return "redirect:http://127.0.0.1:5500/html/import.html";
+        }
+        return "redirect:http://127.0.0.1:5500/html/import.html";
     }
 
     @ExceptionHandler(StorageFileNotFoundException.class)

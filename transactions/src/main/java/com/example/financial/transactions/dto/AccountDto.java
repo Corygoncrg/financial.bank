@@ -1,7 +1,5 @@
 package com.example.financial.transactions.dto;
 
-import com.example.financial.transactions.model.TransactionCsv;
-
 import java.math.BigDecimal;
 
 public record AccountDto(String bank, String agency, String account, BigDecimal totalAmountMoved, String transferType)

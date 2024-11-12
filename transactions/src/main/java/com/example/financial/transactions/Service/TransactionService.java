@@ -2,10 +2,10 @@ package com.example.financial.transactions.Service;
 
 import com.example.financial.transactions.dto.AccountDto;
 import com.example.financial.transactions.dto.AgencyDto;
-import com.example.financial.transactions.dto.TransactionCsvDto;
+import com.example.financial.transactions.dto.TransactionDto;
 import com.example.financial.transactions.kafka.KafkaResponseHandler;
 import com.example.financial.transactions.model.LocalDateTimeEditor;
-import com.example.financial.transactions.model.TransactionCsv;
+import com.example.financial.transactions.model.Transaction;
 import com.example.financial.transactions.repository.TransactionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +39,9 @@ public class TransactionService {
     private CsvParserService csvParserService;
 
     @Autowired
+    private XmlParserService xmlParserService;
+
+    @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
     private final LocalDateTimeEditor localDateTimeEditor;
@@ -56,7 +59,7 @@ public class TransactionService {
         return storageService.loadAsResource(filename);
     }
 
-    public List<TransactionCsvDto> getTransactionsFromFiles(StorageService storageService) throws IOException {
+    public List<TransactionDto> getTransactionsFromFiles(StorageService storageService) throws IOException {
         List<String> fileNames = storageService.loadAll()
                 .map(Path::toString)
                 .toList();
@@ -65,16 +68,22 @@ public class TransactionService {
 
         // For each file, extract the transaction dates
         for (String fileName : fileNames) {
-            List<String> fileContent = storageService.loadFileContent(fileName);
-            transactionDates.addAll(csvParserService.extractTransactionDatesFromFile(fileContent));
+            if (fileName.endsWith(".csv")) {
+                List<String> fileContent = storageService.loadFileContent(fileName);
+                transactionDates.addAll(csvParserService.extractTransactionDatesFromFile(fileContent));
+            } else if (fileName.endsWith(".xml")) {
+                List<String> fileContent = storageService.loadFileContent(fileName);
+                transactionDates.addAll(xmlParserService.extractTransactionDatesFromFile(fileContent)); // Add this method in your XML parser service
+                //Todo: Fix .xml files not showing up on the frontend when uploaded
+            }
         }
 
         // Query the database for transactions with matching dates
-        List<TransactionCsv> transactions = repository.findByTransactionDateIn(transactionDates);
+        List<Transaction> transactions = repository.findByTransactionDateIn(transactionDates);
 
-
-        // Map TransactionCsv to TransactionCsvRecord
-        return transactions.stream().map(TransactionCsvDto::from).collect(Collectors.toList());
+        transactions.forEach(System.out::println);
+        // Map Transaction to TransactionDto
+        return transactions.stream().map(TransactionDto::from).collect(Collectors.toList());
     }
 
     public void csvFileUpload(MultipartFile csvFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher,
@@ -114,18 +123,42 @@ public class TransactionService {
         }
     }
 
+    public void xmlFileUpload(MultipartFile xmlFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher,
+                              Job importTransactionJobXml, StorageService storageService) throws JsonProcessingException {
+        // Send token and wait for the response from Kafka, same as in csvFileUpload
+        kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
+        // Your existing Kafka response handling code...
 
-    public List<TransactionCsvDto> getTransactionsByImportDate(String importDate) {
+        String filename = storageService.store(xmlFile);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String userDtoJson = objectMapper.writeValueAsString(responseHandler.getUserDto());
+
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addString("filename", filename)
+                .addString("userDto", userDtoJson)
+                .addLong("time", System.currentTimeMillis())  // Ensure uniqueness
+                .toJobParameters();
+
+        try {
+            jobLauncher.run(importTransactionJobXml, jobParameters);
+            redirectAttributes.addFlashAttribute("message", "Successfully uploaded and processed " + xmlFile.getOriginalFilename() + "!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("message", "Failed to process file: " + e.getMessage());
+        }
+    }
+
+    public List<TransactionDto> getTransactionsByImportDate(String importDate) {
         localDateTimeEditor.setAsText(importDate);
         LocalDateTime localDateTime = (LocalDateTime) localDateTimeEditor.getValue();
         var transactions = repository.findByImportDate(localDateTime);
-        return transactions.stream().map(TransactionCsvDto::from).collect(Collectors.toList());
+        return transactions.stream().map(TransactionDto::from).collect(Collectors.toList());
     }
 
-    public List<TransactionCsvDto> getSuspectTransactionsByYearAndMonth(int year, int month) {
+    public List<TransactionDto> getSuspectTransactionsByYearAndMonth(int year, int month) {
         var transactions = repository.findSuspectTransactionsByYearAndMonth(year, month);
 
-        return transactions.stream().map(TransactionCsvDto::from).collect(Collectors.toList());
+        return transactions.stream().map(TransactionDto::from).collect(Collectors.toList());
     }
 
     public List<AccountDto> getSuspectAccountsByYearAndMonth(int year, int month) {

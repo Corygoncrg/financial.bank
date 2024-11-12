@@ -1,28 +1,26 @@
 package com.example.financial.transactions.model;
 
-import com.example.financial.transactions.dto.TransactionCsvDto;
-
 import java.time.LocalDateTime;
 
 public class TransactionAdapter {
 
-    public static TransactionCsv transactionRecordToCsvAdapter(TransactionCsvRecord csvRecord, LocalDateTime importDate) {
-        TransactionCsv transaction = new TransactionCsv();
-        transaction.setOriginalBank(csvRecord.getOriginalBank());
-        transaction.setOriginalAgency(csvRecord.getOriginalAgency());
-        transaction.setOriginalAccount(csvRecord.getOriginalAccount());
-        transaction.setDestinyBank(csvRecord.getDestinyBank());
-        transaction.setDestinyAgency(csvRecord.getDestinyAgency());
-        transaction.setDestinyAccount(csvRecord.getDestinyAccount());
-        transaction.setAmount(csvRecord.getAmount());
-        transaction.setTransactionDate(csvRecord.getTransactionDate());
+    public static Transaction transactionRecordToTransactionAdapter(TransactionRecord record, LocalDateTime importDate) {
+        Transaction transaction = new Transaction();
+        transaction.setOriginalBank(record.getOriginalBank());
+        transaction.setOriginalAgency(record.getOriginalAgency());
+        transaction.setOriginalAccount(record.getOriginalAccount());
+        transaction.setDestinyBank(record.getDestinyBank());
+        transaction.setDestinyAgency(record.getDestinyAgency());
+        transaction.setDestinyAccount(record.getDestinyAccount());
+        transaction.setAmount(record.getAmount());
+        transaction.setTransactionDate(record.getTransactionDate());
         transaction.setImportDate(importDate);
-        transaction.setIdUser(csvRecord.getIdUser());
+        transaction.setIdUser(record.getIdUser());
         return transaction;
     }
 
-    public static TransactionCsvRecord transactionCsvToRecordAdapter(TransactionCsv transaction) {
-        TransactionCsvRecord record = new TransactionCsvRecord();
+    public static TransactionRecord transactionToRecordAdapter(Transaction transaction) {
+        TransactionRecord record = new TransactionRecord();
         record.setOriginalBank(transaction.getOriginalBank());
         record.setOriginalAgency(transaction.getOriginalAgency());
         record.setOriginalAccount(transaction.getOriginalAccount());
