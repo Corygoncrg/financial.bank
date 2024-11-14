@@ -1,5 +1,7 @@
 package com.example.financial.transactions.Service;
 
+import com.example.financial.transactions.model.LocalDateTimeEditor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,11 +23,11 @@ import java.util.List;
 @Service
 public class XmlParserService {
 
-    private final DateTimeFormatter dateTimeFormatter;
+    private final LocalDateTimeEditor localDateTimeEditor;
 
+    @Autowired
     public XmlParserService() {
-        // Customize the pattern based on your XML date format (e.g., "yyyy-MM-dd'T'HH:mm:ss")
-        this.dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        this.localDateTimeEditor = new LocalDateTimeEditor("yyyy-MM-dd'T'HH:mm:ss");
     }
 
     public List<LocalDateTime> extractTransactionDatesFromFile(List<String> fileContent) {
@@ -54,7 +56,8 @@ public class XmlParserService {
 
                     try {
                         // Parse the date string to LocalDateTime
-                        LocalDateTime transactionDate = LocalDateTime.parse(dateText, dateTimeFormatter);
+                        localDateTimeEditor.setAsText(dateText);
+                        LocalDateTime transactionDate = (LocalDateTime) localDateTimeEditor.getValue();
                         transactionDates.add(transactionDate);
                     } catch (Exception e) {
                         System.err.println("Error parsing date: " + dateText + ". Skipping...");

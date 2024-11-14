@@ -88,7 +88,6 @@ public class TransactionController {
 
     @PostMapping("/")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
-        //TODO: Make it so that it can accept XML file uploads as well
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
         if ("csv".equalsIgnoreCase(fileExtension)) {
             transactionService.csvFileUpload(file, token, redirectAttributes, jobLauncher, importTransactionJobCsv, storageService);

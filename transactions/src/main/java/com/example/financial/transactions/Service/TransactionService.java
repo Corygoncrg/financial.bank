@@ -51,7 +51,6 @@ public class TransactionService {
         this.localDateTimeEditor = new LocalDateTimeEditor("yyyy-MM-dd'T'HH:mm:ss");  // Customize the pattern based on your CSV data format
     }
 
-
     @Autowired
     private KafkaResponseHandler responseHandler;
 
@@ -79,8 +78,9 @@ public class TransactionService {
         }
 
         // Query the database for transactions with matching dates
-        List<Transaction> transactions = repository.findByTransactionDateIn(transactionDates);
 
+        List<Transaction> transactions = repository.findByTransactionDateIn(transactionDates);
+        System.out.println(transactions);
         transactions.forEach(System.out::println);
         // Map Transaction to TransactionDto
         return transactions.stream().map(TransactionDto::from).collect(Collectors.toList());
@@ -127,15 +127,31 @@ public class TransactionService {
                               Job importTransactionJobXml, StorageService storageService) throws JsonProcessingException {
         // Send token and wait for the response from Kafka, same as in csvFileUpload
         kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
-        // Your existing Kafka response handling code...
+        Long userId;
+        try {
+            // Wait for the user ID from Kafka with a timeout
+            if (responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
+                userId = responseHandler.getUserDto().id();
 
+                if (userId == null) {
+                    throw new RuntimeException("User ID retrieval failed: received null");
+                }
+            } else {
+                throw new RuntimeException("Timeout while waiting for user ID from Kafka");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("message", "Failed to retrieve user ID: " + e.getMessage());
+            return; // Exit the method if user ID could not be retrieved
+        }
+        // Your existing Kafka response handling code...
+        var userDto = responseHandler.getUserDto();
         String filename = storageService.store(xmlFile);
         ObjectMapper objectMapper = new ObjectMapper();
-        String userDtoJson = objectMapper.writeValueAsString(responseHandler.getUserDto());
 
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("filename", filename)
-                .addString("userDto", userDtoJson)
+                .addString("userDto", objectMapper.writeValueAsString(userDto))
                 .addLong("time", System.currentTimeMillis())  // Ensure uniqueness
                 .toJobParameters();
 
