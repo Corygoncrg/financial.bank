@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.example.financial.transactions.exception.StorageException;
@@ -44,7 +45,7 @@ public class FileSystemStorageService implements StorageService {
 			}
 
 			// Clean and normalize the filename
-			String filename = StringUtils.cleanPath(file.getOriginalFilename());
+			String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
 			// Resolve the destination path
 			Path destinationFile = this.rootLocation.resolve(

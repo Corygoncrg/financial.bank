@@ -39,13 +39,10 @@ public class TransactionBatchService {
 
             
             record.setIdUser(new User(dto));
-            System.out.println(record);
-            //fixme: record with null values
             return transactionRecordToTransactionAdapter(record, importDate);
         } else {
             System.out.println("Skipping transaction with date: " + currentTransactionTime);
         }
-        System.out.println("null return");
         return null;
     }
     

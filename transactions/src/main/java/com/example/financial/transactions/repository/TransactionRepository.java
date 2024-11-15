@@ -15,7 +15,6 @@ public interface TransactionRepository extends JpaRepository <Transaction, Long>
     boolean existsByTransactionDate(@Param("transaction_date") LocalDateTime transactionDate);
 
     List<Transaction> findByTransactionDateIn(Set<LocalDateTime> transactionDates);
-    //fixme: Find out why is it saying that's finding transactions of a different day
 
     List<Transaction> findByImportDate(@Param("import_date") LocalDateTime importDate);
 

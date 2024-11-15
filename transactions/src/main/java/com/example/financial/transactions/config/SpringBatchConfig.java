@@ -5,7 +5,6 @@ import com.example.financial.transactions.Service.LineMapperService;
 import com.example.financial.transactions.dto.UserDto;
 import com.example.financial.transactions.model.Transaction;
 import com.example.financial.transactions.model.TransactionRecord;
-import com.example.financial.transactions.model.TransactionRecordsWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.batch.core.Job;
@@ -69,10 +68,7 @@ public class SpringBatchConfig {
     public ItemProcessor<TransactionRecord, Transaction> processor(@Value("#{stepExecution.jobExecution.createTime}") LocalDateTime importDate,
                                                                    @Value("#{jobParameters['userDto']}") String userDtoJson) throws JsonProcessingException {
         UserDto dto = new ObjectMapper().readValue(userDtoJson, UserDto.class);
-        return record -> {
-            // Process each transaction record
-            return batchService.processRecord(record, importDate, dto);
-        };
+        return record -> batchService.processRecord(record, importDate, dto);
     }
 
     @Bean
@@ -112,10 +108,9 @@ public class SpringBatchConfig {
         StaxEventItemReader<TransactionRecord> reader = new StaxEventItemReader<>();
         reader.setResource(new FileSystemResource(uploadDirLocation + "/" + filename));
         reader.setFragmentRootElementName("transacao");  // Root element of each record in the XML
-
-        Jaxb2Marshaller unMarshaller = new Jaxb2Marshaller();
-        unMarshaller.setClassesToBeBound(TransactionRecordsWrapper.class);
-        reader.setUnmarshaller(unMarshaller);
+        Jaxb2Marshaller unmarshaller = new Jaxb2Marshaller();
+        unmarshaller.setClassesToBeBound(TransactionRecord.class);
+        reader.setUnmarshaller(unmarshaller);
         return reader;
     }
 

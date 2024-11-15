@@ -7,7 +7,6 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.eclipse.persistence.oxm.annotations.XmlPath;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,32 +16,13 @@ import java.time.LocalDateTime;
 @XmlRootElement(name = "transacao")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TransactionRecord {
-//FIXME The XmlPaths are not finding the fields correctly
 
 
-    @XmlElement(name = "banco")
-    @XmlPath("origem/banco/text()")
-    private String originalBank;
+    @XmlElement(name = "origem")
+    private BankDetails original;
 
-    @XmlElement(name = "agencia")
-    @XmlPath("origem/agencia/text()")
-    private String originalAgency;
-
-    @XmlElement(name = "conta")
-    @XmlPath("origem/conta/text()")
-    private String originalAccount;
-
-    @XmlElement(name = "banco")
-    @XmlPath("destino/banco/text()")
-    private String destinyBank;
-
-    @XmlElement(name = "agencia")
-    @XmlPath("destino/agencia/text()")
-    private String destinyAgency;
-
-    @XmlElement(name = "conta")
-    @XmlPath("destino/conta/text()")
-    private String destinyAccount;
+    @XmlElement(name = "destino")
+    private BankDetails destiny;
 
     @XmlElement(name = "valor")
     private BigDecimal amount;
@@ -53,4 +33,19 @@ public class TransactionRecord {
 
     private LocalDateTime importDate;
     private User idUser;
+
+    @Data
+    @NoArgsConstructor
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class BankDetails {
+        @XmlElement(name = "banco")
+        private String bank;
+
+        @XmlElement(name = "agencia")
+        private String agency;
+
+        @XmlElement(name = "conta")
+        private String account;
+    }
+
 }

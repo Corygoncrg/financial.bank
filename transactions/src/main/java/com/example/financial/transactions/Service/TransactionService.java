@@ -73,7 +73,6 @@ public class TransactionService {
             } else if (fileName.endsWith(".xml")) {
                 List<String> fileContent = storageService.loadFileContent(fileName);
                 transactionDates.addAll(xmlParserService.extractTransactionDatesFromFile(fileContent)); // Add this method in your XML parser service
-                //Todo: Fix .xml files not showing up on the frontend when uploaded
             }
         }
 
