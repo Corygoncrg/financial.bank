@@ -72,16 +72,12 @@ public class TransactionService {
                 transactionDates.addAll(csvParserService.extractTransactionDatesFromFile(fileContent));
             } else if (fileName.endsWith(".xml")) {
                 List<String> fileContent = storageService.loadFileContent(fileName);
-                transactionDates.addAll(xmlParserService.extractTransactionDatesFromFile(fileContent)); // Add this method in your XML parser service
+                transactionDates.addAll(xmlParserService.extractTransactionDatesFromFile(fileContent));
             }
         }
 
-        // Query the database for transactions with matching dates
-
         List<Transaction> transactions = repository.findByTransactionDateIn(transactionDates);
-        System.out.println(transactions);
-        transactions.forEach(System.out::println);
-        // Map Transaction to TransactionDto
+
         return transactions.stream().map(TransactionDto::from).collect(Collectors.toList());
     }
 
@@ -90,7 +86,6 @@ public class TransactionService {
         kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
         Long userId;
         try {
-            // Wait for the user ID from Kafka with a timeout
             if (responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
                 userId = responseHandler.getUserDto().id();
 
@@ -103,7 +98,7 @@ public class TransactionService {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("message", "Failed to retrieve user ID: " + e.getMessage());
-            return; // Exit the method if user ID could not be retrieved
+            return;
         }
         var userDto = responseHandler.getUserDto();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -124,11 +119,9 @@ public class TransactionService {
 
     public void xmlFileUpload(MultipartFile xmlFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher,
                               Job importTransactionJobXml, StorageService storageService) throws JsonProcessingException {
-        // Send token and wait for the response from Kafka, same as in csvFileUpload
         kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
         Long userId;
         try {
-            // Wait for the user ID from Kafka with a timeout
             if (responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
                 userId = responseHandler.getUserDto().id();
 
@@ -141,9 +134,8 @@ public class TransactionService {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("message", "Failed to retrieve user ID: " + e.getMessage());
-            return; // Exit the method if user ID could not be retrieved
+            return;
         }
-        // Your existing Kafka response handling code...
         var userDto = responseHandler.getUserDto();
         String filename = storageService.store(xmlFile);
         ObjectMapper objectMapper = new ObjectMapper();
