@@ -6,28 +6,34 @@ import com.example.financial.transactions.kafka.KafkaResponseHandler;
 import com.example.financial.transactions.model.Transaction;
 import com.example.financial.transactions.model.User;
 import com.example.financial.transactions.repository.TransactionRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.core.io.Resource;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -50,12 +56,28 @@ class TransactionServiceTest {
     @Mock
     User user;
 
-
     @Mock
     KafkaResponseHandler responseHandler;
 
+    @Mock
+    KafkaTemplate<String, String> kafkaTemplate;
+
+    @Mock
+    JobLauncher jobLauncher;
+
+    @Mock
+    RedirectAttributes redirectAttributes;
+
+    @Mock
+    MultipartFile csvFile;
+
+    @Mock
+    Job importTransactionJob;
+
     @InjectMocks
     TransactionService transactionService;
+
+
 
     @Test
     @DisplayName("Test resource returns filename")
@@ -103,8 +125,8 @@ class TransactionServiceTest {
     @DisplayName("Test csv parsing from transaction date")
     void getTransactionFromFiles3() {
         List<String> content = List.of("name", "birthday", "age", "phone");
-        List<LocalDateTime> list = List.of(LocalDateTime.of(2020, 2, 1, 12, 0),
-                                     LocalDateTime.of(2022, 2, 1, 12, 0));
+        List<LocalDateTime> list = List.of(getTransaction().getTransactionDate(),
+                getTransaction2().getTransactionDate());
         when(csvParserService.extractTransactionDatesFromFile(content)).thenReturn(list);
 
         var result = csvParserService.extractTransactionDatesFromFile(content);
@@ -116,8 +138,8 @@ class TransactionServiceTest {
     @DisplayName("Test xml parsing from transaction date")
     void getTransactionFromFiles4() {
         List<String> content = List.of("name", "birthday", "age", "phone");
-        List<LocalDateTime> list = List.of(LocalDateTime.of(2020, 2, 1, 12, 0),
-                                     LocalDateTime.of(2020, 2, 1, 12, 0));
+        List<LocalDateTime> list = List.of(getTransaction().getTransactionDate(),
+                                     getTransaction2().getTransactionDate());
         when(xmlParserService.extractTransactionDatesFromFile(content)).thenReturn(list);
 
         var result = xmlParserService.extractTransactionDatesFromFile(content);
@@ -128,12 +150,11 @@ class TransactionServiceTest {
     @Test
     @DisplayName("Test repository returns expected transactions")
     void getTransactionFromFiles5() {
-        var decimal = BigDecimal.valueOf(1000);
-        var transactionDate = getTransaction(decimal).getTransactionDate();
-        var transactionDate2 = getTransaction2(decimal).getTransactionDate();
+        var transactionDate = getTransaction().getTransactionDate();
+        var transactionDate2 = getTransaction2().getTransactionDate();
         Set<LocalDateTime> transactionDates = Set.of(transactionDate, transactionDate2);
-        Transaction transaction = getTransaction(decimal);
-        var transaction2 = getTransaction2(decimal);
+        Transaction transaction = getTransaction();
+        var transaction2 = getTransaction2();
 
         List<Transaction> transactions = List.of(transaction, transaction2);
         when(repository.findByTransactionDateIn(transactionDates)).thenReturn(transactions);
@@ -150,14 +171,13 @@ class TransactionServiceTest {
         List<String> fileNames = List.of("file1.csv", "file2.xml");
         List<String> csvContent = List.of("csvData1", "csvData2");
         List<String> xmlContent = List.of("xmlData1", "xmlData2");
-        var decimal = BigDecimal.valueOf(1000);
-        var transactionDate = getTransaction(decimal).getTransactionDate();
-        var transactionDate2 = getTransaction2(decimal).getTransactionDate();
-        List<LocalDateTime> transactionDates = List.of(LocalDateTime.of(2020, 2, 1, 12, 0),
-                LocalDateTime.of(2020, 2, 1, 13, 30));
+        var transactionDate = getTransaction().getTransactionDate();
+        var transactionDate2 = getTransaction2().getTransactionDate();
+        List<LocalDateTime> transactionDates = List.of(transactionDate,
+                transactionDate2);
         Set<LocalDateTime> transactionDateSet = Set.of(transactionDate, transactionDate2);
 
-        List<Transaction> transactions = List.of(getTransaction(decimal), getTransaction2(decimal));
+        List<Transaction> transactions = List.of(getTransaction(), getTransaction2());
 
         when(storageService.loadAll()).thenReturn(fileNames.stream().map(Paths::get));
         when(storageService.loadFileContent("file1.csv")).thenReturn(csvContent);
@@ -197,20 +217,105 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("")
-    void csvFileUpload3() {
-/*
-        JobParameters jobParameters = new JobParametersBuilder()
+    @DisplayName("Test JobParameters are set")
+    void csvFileUpload3() throws JsonProcessingException {
+        String filename = "filename";
+        var userDto = getUserDto();
+        var time = System.currentTimeMillis();
+        var objectMapper = mock(ObjectMapper.class);
+        when(objectMapper.writeValueAsString(userDto)).thenReturn(getUserDtoJson());
+
+        var result = new JobParametersBuilder()
                 .addString("filename", filename)
                 .addString("userDto", objectMapper.writeValueAsString(userDto))
-                .addLong("time", System.currentTimeMillis())  // Use time to ensure uniqueness
+                .addLong("time", time)
                 .toJobParameters();
-*/
 
+        assertEquals(filename, result.getString("filename"));
+        assertEquals(getUserDtoJson(), result.getString("userDto"));
+        assertEquals(time, result.getLong("time"));
+    }
+
+    @Test
+    @DisplayName("Test kafka message is sent")
+    void csvFileUpload4() throws JsonProcessingException, InterruptedException {
+        String token = "Magic token";
+        String testFile = "testFile.csv";
+        when(storageService.store(csvFile)).thenReturn(testFile);
+        when(responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)).thenReturn(true);
+        when(responseHandler.getUserDto()).thenReturn(getUserDto());
+        transactionService.csvFileUpload(csvFile, token, redirectAttributes, jobLauncher, importTransactionJob, storageService);
+
+        verify(kafkaTemplate).send("FINANCIAL_BANK_TRANSACTIONS", token);
+    }
+
+    @Test
+    @DisplayName("Test timeout while waiting for User Id")
+    void csvFileUpload5() throws JsonProcessingException, InterruptedException {
+        String token = "Magic token";
+
+        when(responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)).thenReturn(false);
+
+        transactionService.csvFileUpload(csvFile, token, redirectAttributes, jobLauncher, importTransactionJob, storageService);
+
+        verify(redirectAttributes).addFlashAttribute("message", "Failed to retrieve user ID: Timeout while waiting for user ID from Kafka");
+    }
+
+    @Test
+    @DisplayName("Test file storage and filename in jobParameters")
+    void csvFileUpload6() throws JsonProcessingException, InterruptedException {
+        String token = "Magic token";
+
+        String testFile = "testFile.csv";
+        when(storageService.store(csvFile)).thenReturn(testFile);
+        when(responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)).thenReturn(true);
+        when(responseHandler.getUserDto()).thenReturn(getUserDto());
+
+
+        transactionService.csvFileUpload(csvFile, token, redirectAttributes, jobLauncher, importTransactionJob, storageService);
+
+        verify(storageService).store(csvFile);
+    }
+
+    @Test
+    @DisplayName("Test successful file upload")
+    void csvFileUpload7() throws JsonProcessingException, InterruptedException {
+        String token = "Magic token";
+
+        String testFile = "testFile.csv";
+
+        when(storageService.store(csvFile)).thenReturn(testFile);
+        when(responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)).thenReturn(true);
+        when(responseHandler.getUserDto()).thenReturn(getUserDto());
+        when(csvFile.getOriginalFilename()).thenReturn(testFile);
+
+
+        transactionService.csvFileUpload(csvFile, token, redirectAttributes, jobLauncher, importTransactionJob, storageService);
+
+        verify(redirectAttributes).addFlashAttribute("message", "Successfully uploaded and processed " + testFile + "!");
+    }
+
+    @Test
+    @DisplayName("Test overall CSV file upload flow")
+    void testCsvFileUploadIntegration() throws Exception {
+        String token = "someToken";
+        String filename = "testFile.csv";
+        when(storageService.store(csvFile)).thenReturn(filename);
+        when(responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)).thenReturn(true);
+        when(responseHandler.getUserDto()).thenReturn(getUserDto());
+
+        transactionService.csvFileUpload(csvFile, token, redirectAttributes, jobLauncher, importTransactionJob, storageService);
+
+        verify(kafkaTemplate).send("FINANCIAL_BANK_TRANSACTIONS", token);
+        verify(storageService).store(csvFile);
+        verify(jobLauncher).run(eq(importTransactionJob), any(JobParameters.class));
+        verify(redirectAttributes).addFlashAttribute(
+                "message", "Successfully uploaded and processed " + csvFile.getOriginalFilename() + "!"
+        );
     }
 
 
-    private Transaction getTransaction(BigDecimal decimal) {
+    private Transaction getTransaction() {
         Transaction transaction = new Transaction();
         transaction.setId(1L);
         transaction.setOriginalBank("originalBank");
@@ -219,12 +324,12 @@ class TransactionServiceTest {
         transaction.setDestinyBank("destinyBank");
         transaction.setDestinyAgency("destinyAgency");
         transaction.setDestinyAccount("destinyAccount");
-        transaction.setAmount(decimal);
+        transaction.setAmount(BigDecimal.valueOf(1000));
         transaction.setTransactionDate(LocalDateTime.of(2020, 2, 1, 12, 0));
         transaction.setIdUser(user);
         return transaction;
     }
-    private Transaction getTransaction2(BigDecimal decimal) {
+    private Transaction getTransaction2() {
         Transaction transaction = new Transaction();
         transaction.setId(1L);
         transaction.setOriginalBank("originalBank2");
@@ -233,7 +338,7 @@ class TransactionServiceTest {
         transaction.setDestinyBank("destinyBank2");
         transaction.setDestinyAgency("destinyAgency2");
         transaction.setDestinyAccount("destinyAccount2");
-        transaction.setAmount(decimal);
+        transaction.setAmount(BigDecimal.valueOf(1000));
         transaction.setTransactionDate(LocalDateTime.of(2020, 2, 1, 13, 30));
         transaction.setIdUser(user);
         return transaction;
@@ -241,6 +346,10 @@ class TransactionServiceTest {
 
     private UserDto getUserDto() {
         return new UserDto(1L, "Name", "example@email.com", "Active");
+    }
+
+    private String getUserDtoJson() {
+        return "{\"id\":1,\"name\":\"Name\",\"email\":\"example@email.com\",\"status\":\"Active\"}";
     }
 
 }

@@ -82,7 +82,7 @@ public class TransactionService {
     }
 
     public void csvFileUpload(MultipartFile csvFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher,
-                              Job importTransactionJob, StorageService storageService) throws JsonProcessingException {
+                              Job importTransactionJobCsv, StorageService storageService) throws JsonProcessingException {
         kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
         Long userId;
         try {
@@ -109,7 +109,7 @@ public class TransactionService {
                 .addLong("time", System.currentTimeMillis())  // Use time to ensure uniqueness
                 .toJobParameters();
         try {
-            jobLauncher.run(importTransactionJob, jobParameters);
+            jobLauncher.run(importTransactionJobCsv, jobParameters);
             redirectAttributes.addFlashAttribute("message", "Successfully uploaded and processed " + csvFile.getOriginalFilename() + "!");
         } catch (Exception e) {
             e.printStackTrace();

@@ -81,8 +81,8 @@ public class SpringBatchConfig {
     }
 
     @Bean
-    public Job importTransactionJob(JobRepository repository, Step stepCsv, JobCompletionNotificationListener listener) {
-        return new JobBuilder("importTransactionJob", repository)
+    public Job importTransactionJobCsv(JobRepository repository, Step stepCsv, JobCompletionNotificationListener listener) {
+        return new JobBuilder("importTransactionJobCsv", repository)
                 .listener(listener)
                 .start(stepCsv)
                 .build();

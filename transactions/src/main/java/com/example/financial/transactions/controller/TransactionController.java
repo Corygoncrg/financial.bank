@@ -32,7 +32,7 @@ public class TransactionController {
     private final Job importTransactionJobXml;
 
     @Autowired
-    public TransactionController(StorageService storageService, JobLauncher jobLauncher, @Qualifier("importTransactionJob") Job importTransactionJobCsv,
+    public TransactionController(StorageService storageService, JobLauncher jobLauncher, @Qualifier("importTransactionJobCsv") Job importTransactionJobCsv,
                                  @Qualifier("importTransactionJobXml") Job importTransactionJobXml) {
         this.storageService = storageService;
         this.jobLauncher = jobLauncher;
