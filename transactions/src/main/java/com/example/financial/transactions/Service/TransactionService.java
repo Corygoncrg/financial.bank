@@ -48,7 +48,7 @@ public class TransactionService {
 
     @Autowired
     public TransactionService() {
-        this.localDateTimeEditor = new LocalDateTimeEditor("yyyy-MM-dd'T'HH:mm:ss");  // Customize the pattern based on your CSV data format
+        this.localDateTimeEditor = new LocalDateTimeEditor("yyyy-MM-dd'T'HH:mm:ss");
     }
 
     @Autowired
@@ -65,7 +65,6 @@ public class TransactionService {
 
         Set<LocalDateTime> transactionDates = new HashSet<>();
 
-        // For each file, extract the transaction dates
         for (String fileName : fileNames) {
             if (fileName.endsWith(".csv")) {
                 List<String> fileContent = storageService.loadFileContent(fileName);
@@ -106,7 +105,7 @@ public class TransactionService {
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("filename", filename)
                 .addString("userDto", objectMapper.writeValueAsString(userDto))
-                .addLong("time", System.currentTimeMillis())  // Use time to ensure uniqueness
+                .addLong("time", System.currentTimeMillis())
                 .toJobParameters();
         try {
             jobLauncher.run(importTransactionJobCsv, jobParameters);
@@ -143,7 +142,7 @@ public class TransactionService {
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("filename", filename)
                 .addString("userDto", objectMapper.writeValueAsString(userDto))
-                .addLong("time", System.currentTimeMillis())  // Ensure uniqueness
+                .addLong("time", System.currentTimeMillis())
                 .toJobParameters();
 
         try {

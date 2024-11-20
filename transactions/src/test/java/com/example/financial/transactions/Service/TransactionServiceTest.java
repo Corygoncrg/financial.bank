@@ -3,6 +3,7 @@ package com.example.financial.transactions.Service;
 import com.example.financial.transactions.dto.TransactionDto;
 import com.example.financial.transactions.dto.UserDto;
 import com.example.financial.transactions.kafka.KafkaResponseHandler;
+import com.example.financial.transactions.model.LocalDateTimeEditor;
 import com.example.financial.transactions.model.Transaction;
 import com.example.financial.transactions.model.User;
 import com.example.financial.transactions.repository.TransactionRepository;
@@ -28,6 +29,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -96,7 +98,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Test that the file names are loaded correctly")
+    @DisplayName("Test the file names are loaded correctly")
     void getTransactionsFromFiles1() {
         //arrange
         List<String> fileNames = List.of("file1.csv", "file2.xml", "file3.csv");
@@ -110,7 +112,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Test that file content is loaded correctly")
+    @DisplayName("Test file content is loaded correctly")
     void getTransactionFromFiles2() throws IOException {
         List<String> content = List.of("name", "birthday", "age", "phone");
         String filename = "fileName";
@@ -139,7 +141,7 @@ class TransactionServiceTest {
     void getTransactionFromFiles4() {
         List<String> content = List.of("name", "birthday", "age", "phone");
         List<LocalDateTime> list = List.of(getTransaction().getTransactionDate(),
-                                     getTransaction2().getTransactionDate());
+                getTransaction2().getTransactionDate());
         when(xmlParserService.extractTransactionDatesFromFile(content)).thenReturn(list);
 
         var result = xmlParserService.extractTransactionDatesFromFile(content);
@@ -165,7 +167,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Test that transaction DTOs are returned from files")
+    @DisplayName("Test transaction DTOs are returned from files")
     void getTransactionsFromFilesTest() throws IOException {
         // Arrange
         List<String> fileNames = List.of("file1.csv", "file2.xml");
@@ -296,7 +298,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Test overall CSV file upload flow")
+    @DisplayName("Test overall CSV/XMl file upload flow")
     void testCsvFileUploadIntegration() throws Exception {
         String token = "someToken";
         String filename = "testFile.csv";
@@ -314,6 +316,75 @@ class TransactionServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("Test transactions are loaded correctly")
+    void getTransactionsByImportDate() {
+        String importDate = "2022/01";
+        var localDateTimeEditor = mock(LocalDateTimeEditor.class);
+        List<Transaction> transactions = List.of(getTransaction(), getTransaction2());
+        localDateTimeEditor.setAsText(importDate);
+        LocalDateTime localDateTime = (LocalDateTime) localDateTimeEditor.getValue();
+        when(repository.findByImportDate(localDateTime)).thenReturn(transactions);
+
+        var result = repository.findByImportDate(localDateTime);
+
+        assertEquals(transactions, result);
+    }
+
+    @Test
+    @DisplayName("Test suspected transactions are loaded correctly")
+    void getSuspectTransactionsByYearAndMonth() {
+        int year = 2022;
+        int month = 01;
+        List<Transaction> transactions = List.of(getTransaction(), getTransaction2());
+
+        when(repository.findSuspectTransactionsByYearAndMonth(year, month)).thenReturn(transactions);
+
+        var result = repository.findSuspectTransactionsByYearAndMonth(year, month);
+
+        assertEquals(transactions, result);
+
+    }
+
+    @Test
+    @DisplayName("Test suspected accounts are loaded correctly")
+    void getSuspectAccountsByYearAndMonth() {
+        int year = 2022;
+        int month = 01;
+        List<Object[]> transactions = List.of(
+                new Object[]{1L, "Transaction1", 100.0},
+                new Object[]{2L, "Transaction2", 200.0}
+        );
+        when(repository.findSuspectAccountsByYearAndMonth(year, month)).thenReturn(transactions);
+
+        var result = repository.findSuspectAccountsByYearAndMonth(year, month);
+
+        assertEquals(transactions, result);
+        assertEquals(1L, transactions.get(0)[0]);
+        assertEquals("Transaction1", transactions.get(0)[1]);
+        assertEquals(100.0, transactions.get(0)[2]);
+
+    }
+
+    @Test
+    @DisplayName("Test suspected agencies are loaded correctly")
+    void getSuspectAgenciesByYearAndMonth() {
+        int year = 2022;
+        int month = 01;
+        List<Object[]> transactions = List.of(
+                new Object[]{1L, "Transaction1", 100.0},
+                new Object[]{2L, "Transaction2", 200.0}
+        );
+        when(repository.findSuspectAgenciesByYearAndMonth(year, month)).thenReturn(transactions);
+
+        var result = repository.findSuspectAgenciesByYearAndMonth(year, month);
+
+        assertEquals(transactions, result);
+        assertEquals(1L, transactions.get(0)[0]);
+        assertEquals("Transaction1", transactions.get(0)[1]);
+        assertEquals(100.0, transactions.get(0)[2]);
+
+    }
 
     private Transaction getTransaction() {
         Transaction transaction = new Transaction();
