@@ -30,13 +30,10 @@ public class TransactionBatchService {
 
         if (isSameDay(currentTransactionTime, firstTransactionDate)) {
             if (repository.existsByTransactionDate(currentTransactionTime)) {
-                // If the transaction is a duplicate, log and skip it
                 System.out.println("Duplicate transaction detected, skipping: " + currentTransactionTime);
-                return null;  // Skip the record if it's a duplicate
+                return null;
             }
             System.out.println("Processing transaction with date: " + currentTransactionTime);
-
-
             
             record.setIdUser(new User(dto));
             return transactionRecordToTransactionAdapter(record, importDate);
@@ -51,5 +48,6 @@ public class TransactionBatchService {
                 && date1.getMonth() == date2.getMonth()
                 && date1.getYear() == date2.getYear();
     }
+
 }
 
