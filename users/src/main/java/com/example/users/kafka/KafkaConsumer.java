@@ -22,10 +22,9 @@ public class KafkaConsumer {
 
     @KafkaListener(topics = "FINANCIAL_BANK_TRANSACTIONS", groupId = "user-group")
     public void receiveToken(String token) {
-        String userId = tokenService.getSubject(token);  // Replace with actual token parsing logic
+        String userId = tokenService.getSubject(token);
         var user = repository.findByName(userId);
 
-        // Send the user ID back to `financial.transactions`
         var userDto = new UserDto(user);
         kafkaTemplate.send("FINANCIAL_BANK_USERS", userDto);
     }

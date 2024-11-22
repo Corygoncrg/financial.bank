@@ -1,11 +1,12 @@
 package com.example.users.controller;
 
 import com.example.users.dto.authentication.AuthenticationDTO;
-import com.example.users.dto.authentication.TokenJWTDTO;
 import com.example.users.dto.user.UserDto;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
-import com.example.users.model.*;
+import com.example.users.model.DeactivateUserResult;
+import com.example.users.model.UpdateUserResult;
+import com.example.users.model.VerifyUserResult;
 import com.example.users.service.LoginService;
 import com.example.users.service.UserService;
 import jakarta.validation.Valid;

@@ -16,7 +16,7 @@ public class UserValidator {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "uuid", length = 36) // UUID string length
+    @Column(name = "uuid", length = 36)
     private String uuid;
 
     @ManyToOne
@@ -27,15 +27,12 @@ public class UserValidator {
 
     public UserValidator(User user) {
         this.idUser = user;
-        this.uuid = UUID.randomUUID().toString(); // Save as string
+        this.uuid = UUID.randomUUID().toString();
         this.expirationDate = Instant.now().plusMillis(900000);
     }
 
     public UUID getUuid() {
-        return UUID.fromString(this.uuid); // Convert string to UUID
+        return UUID.fromString(this.uuid);
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid.toString(); // Convert UUID to string
-    }
 }

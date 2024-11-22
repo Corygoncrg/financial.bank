@@ -11,7 +11,6 @@ import java.util.Set;
 
 public interface TransactionRepository extends JpaRepository <Transaction, Long> {
 
-    // Query to find existing transactions by their unique fields (e.g., date, account details, and amount)
     boolean existsByTransactionDate(@Param("transaction_date") LocalDateTime transactionDate);
 
     List<Transaction> findByTransactionDateIn(Set<LocalDateTime> transactionDates);
@@ -37,7 +36,6 @@ public interface TransactionRepository extends JpaRepository <Transaction, Long>
         """)
     List<Object[]> findSuspectAccountsByYearAndMonth(@Param("year") int year, @Param("month") int month);
 
-    // Repository method for aggregated agency data
     @Query("""
         SELECT t.originalBank AS bank, t.originalAgency AS agency,
                SUM(t.amount) AS totalAmountMoved, 'Enter' AS transferType

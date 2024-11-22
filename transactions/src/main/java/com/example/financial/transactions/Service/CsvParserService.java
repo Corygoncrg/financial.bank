@@ -22,30 +22,26 @@ public class CsvParserService {
         List<LocalDateTime> transactionDates = new ArrayList<>();
 
         for (String line : fileContent) {
-            // Skip empty lines
             if (line == null || line.trim().isEmpty()) {
                 continue;
             }
 
             String[] columns = line.split(",");
 
-            // Ensure that the line has enough columns before processing
-            if (columns.length < 8) {  // Assuming you expect 8 columns, adjust this number based on your CSV structure
-                System.err.println("Skipping malformed line: " + line);  // Log the malformed line and skip
+            if (columns.length < 8) {
+                System.err.println("Skipping malformed line: " + line);
                 continue;
             }
 
             try {
-                // Parse the date from the expected column (e.g., first column)
-                localDateTimeEditor.setAsText(columns[7]);  // Adjust the column index if needed
+                localDateTimeEditor.setAsText(columns[7]);
                 LocalDateTime transactionDate = (LocalDateTime) localDateTimeEditor.getValue();
 
-                // Add the parsed date to the list
                 transactionDates.add(transactionDate);
 
             } catch (Exception e) {
-                System.err.println("Error parsing line: " + line + ". Skipping...");  // Log the error
-                e.printStackTrace();  // Optional: Log the stack trace for debugging
+                System.err.println("Error parsing line: " + line + ". Skipping...");
+                e.printStackTrace();
             }
         }
 

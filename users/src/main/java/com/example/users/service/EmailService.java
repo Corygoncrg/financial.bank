@@ -24,7 +24,6 @@ public class EmailService {
             mailSender.send(msg);
         }
         catch (MailException ex) {
-            // simply log it and go on...
             System.err.println(ex.getMessage());
         }
     }

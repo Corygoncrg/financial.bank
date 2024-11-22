@@ -29,14 +29,14 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("OctalInteger")
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
 

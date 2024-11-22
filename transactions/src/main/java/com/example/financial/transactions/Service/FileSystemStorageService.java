@@ -1,5 +1,15 @@
 package com.example.financial.transactions.Service;
 
+import com.example.financial.transactions.exception.StorageException;
+import com.example.financial.transactions.exception.StorageFileNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -10,16 +20,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import com.example.financial.transactions.exception.StorageException;
-import com.example.financial.transactions.exception.StorageFileNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.financial.transactions.config.StorageProperties.uploadDirLocation;
 
@@ -44,26 +44,21 @@ public class FileSystemStorageService implements StorageService {
 				throw new StorageException("Failed to store empty file.");
 			}
 
-			// Clean and normalize the filename
 			String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
-			// Resolve the destination path
 			Path destinationFile = this.rootLocation.resolve(
 							Paths.get(filename))
 					.normalize().toAbsolutePath();
 
-			// Security check to prevent path traversal
 			if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
 				throw new StorageException("Cannot store file outside current directory.");
 			}
 
-			// Copy file data to the target location
 			try (InputStream inputStream = file.getInputStream()) {
 				Files.copy(inputStream, destinationFile,
 						StandardCopyOption.REPLACE_EXISTING);
 			}
 
-			// Return the stored filename after successfully storing the file
 			return filename;
 
 		} catch (IOException e) {
@@ -115,8 +110,8 @@ public class FileSystemStorageService implements StorageService {
 
 	@Override
 	public List<String> loadFileContent(String filename) throws IOException {
-		Path file = load(filename);  // Load the file path
-		return Files.readAllLines(file);  // Read file content into a List of Strings
+		Path file = load(filename);
+		return Files.readAllLines(file);
 	}
 
 	@Override

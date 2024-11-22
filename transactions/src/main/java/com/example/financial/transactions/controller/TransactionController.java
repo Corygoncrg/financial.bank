@@ -57,14 +57,12 @@ public class TransactionController {
     @GetMapping("/transactions")
     @ResponseBody
     public List<TransactionDto> getTransactions() throws IOException {
-        // Return a list of transactions with `transaction_date` and `import_date`
         return transactionService.getTransactionsFromFiles(storageService);
     }
 
     @GetMapping("/transactions/details/{importDate}")
     @ResponseBody
     public List<TransactionDto> detailTransaction(@PathVariable String importDate) {
-        // Return a list of transactions with `transaction_date` and `import_date`
         return transactionService.getTransactionsByImportDate(importDate);
     }
 
@@ -89,6 +87,7 @@ public class TransactionController {
     @PostMapping("/")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+
         if ("csv".equalsIgnoreCase(fileExtension)) {
             transactionService.csvFileUpload(file, token, redirectAttributes, jobLauncher, importTransactionJobCsv, storageService);
         } else if ("xml".equalsIgnoreCase(fileExtension)) {

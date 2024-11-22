@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -33,7 +34,7 @@ public class UserService {
 
     public boolean register(@Valid UserRegisterDto dto) {
         if (repository.existsByName(dto.username()) || repository.existsByEmail(dto.email())) {
-            return false; // User exists, registration fails
+            return false;
         }
 
         var user = new User(dto);
@@ -42,6 +43,7 @@ public class UserService {
 
         emailService.sendPasswordEmail(user, validator);
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+
         repository.save(user);
         validatorRepository.save(validator);
         System.out.println(validator.getUuid());
@@ -83,6 +85,7 @@ public class UserService {
 
     public VerifyUserResult verifyUser (String uuid) {
         try {
+            UUID.fromString(uuid);
             var validatorOptional = validatorRepository.findByUuid(uuid);
 
             if (validatorOptional.isEmpty()){

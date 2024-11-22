@@ -1,7 +1,7 @@
 package com.example.financial.transactions.config;
 
-import com.example.financial.transactions.Service.TransactionBatchService;
 import com.example.financial.transactions.Service.LineMapperService;
+import com.example.financial.transactions.Service.TransactionBatchService;
 import com.example.financial.transactions.dto.UserDto;
 import com.example.financial.transactions.model.Transaction;
 import com.example.financial.transactions.model.TransactionRecord;
@@ -29,7 +29,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import javax.sql.DataSource;
-
 import java.time.LocalDateTime;
 
 import static com.example.financial.transactions.Service.SqlService.*;
@@ -107,7 +106,7 @@ public class SpringBatchConfig {
     public StaxEventItemReader<TransactionRecord> xmlReader(@Value("#{jobParameters['filename']}") String filename) {
         StaxEventItemReader<TransactionRecord> reader = new StaxEventItemReader<>();
         reader.setResource(new FileSystemResource(uploadDirLocation + "/" + filename));
-        reader.setFragmentRootElementName("transacao");  // Root element of each record in the XML
+        reader.setFragmentRootElementName("transacao");
         Jaxb2Marshaller unmarshaller = new Jaxb2Marshaller();
         unmarshaller.setClassesToBeBound(TransactionRecord.class);
         reader.setUnmarshaller(unmarshaller);

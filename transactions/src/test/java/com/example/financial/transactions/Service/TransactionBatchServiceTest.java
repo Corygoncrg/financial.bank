@@ -15,7 +15,7 @@ import org.mockito.MockitoAnnotations;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 class TransactionBatchServiceTest {
 
