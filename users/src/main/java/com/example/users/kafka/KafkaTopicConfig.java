@@ -10,13 +10,18 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicConfig {
 
     @Bean
-    public NewTopic usersTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_USERS")
+    public NewTopic usersRequestTopic() {
+        return TopicBuilder.name("FINANCIAL_BANK_USERS_REQUEST")
+                .partitions(3)
+                .replicas(1)
                 .build();
     }
 
-    @KafkaListener(id = "myId", topics = "FINANCIAL_BANK_USERS")
-    public void listen(String in) {
-        System.out.println(in);
+    @Bean
+    public NewTopic usersResponseTopic() {
+        return TopicBuilder.name("FINANCIAL_BANK_USERS_RESPONSE")
+                .partitions(3)
+                .replicas(1)
+                .build();
     }
 }

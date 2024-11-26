@@ -1,8 +1,8 @@
-package com.example.users.infra.security;
+package com.example.security.filter;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.example.users.repository.UserRepository;
-import com.example.users.service.TokenService;
+import com.example.security.kafka.consumer.KafkaConsumer;
+import com.example.security.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     private TokenService tokenService;
 
     @Autowired
-    private UserRepository repository;
+    private KafkaConsumer kafkaConsumer;
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
 
@@ -38,11 +38,11 @@ public class SecurityFilter extends OncePerRequestFilter {
                 var subject = tokenService.getSubject(tokenJWT);
                 logger.debug("Token subject: {}", subject);
 
-                var user = repository.findByName(subject);
+                var user = kafkaConsumer.getUserAuthentication(subject);
                 if (user != null) {
-                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.authorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    logger.debug("User authenticated: {}", user.getUsername());
+                    logger.debug("User authenticated: {}", user.username());
                 } else {
                     logger.debug("User not found for subject: {}", subject);
                 }

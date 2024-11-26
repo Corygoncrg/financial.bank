@@ -44,6 +44,8 @@ public class TransactionService {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
+    private final String topic = "FINANCIAL_BANK_TRANSACTIONS_REQUEST";
+
     private final LocalDateTimeEditor localDateTimeEditor;
 
     @Autowired
@@ -82,7 +84,7 @@ public class TransactionService {
 
     public void csvFileUpload(MultipartFile csvFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher,
                               Job importTransactionJobCsv, StorageService storageService) throws JsonProcessingException {
-        kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
+        kafkaTemplate.send(topic, token);
         Long userId;
         try {
             if (responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
@@ -118,7 +120,7 @@ public class TransactionService {
 
     public void xmlFileUpload(MultipartFile xmlFile, String token, RedirectAttributes redirectAttributes, JobLauncher jobLauncher,
                               Job importTransactionJobXml, StorageService storageService) throws JsonProcessingException {
-        kafkaTemplate.send("FINANCIAL_BANK_TRANSACTIONS", token);
+        kafkaTemplate.send(topic, token);
         Long userId;
         try {
             if (responseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {

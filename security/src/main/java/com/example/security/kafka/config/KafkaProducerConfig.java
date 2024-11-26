@@ -1,7 +1,6 @@
-package com.example.users.kafka;
+package com.example.security.kafka.config;
 
-import com.example.users.dto.user.UserAuthenticationDto;
-import com.example.users.dto.user.UserDto;
+import com.example.security.dto.UserAuthenticationDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,31 +20,17 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    public Map<String, Object> producerConfig() {
+    @Bean
+    public ProducerFactory<String, UserAuthenticationDto> producerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        return props;
+        return new DefaultKafkaProducerFactory<>(props);
     }
 
     @Bean
-    public ProducerFactory<String, UserDto> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfig());
-    }
-
-    @Bean
-    public KafkaTemplate<String, UserDto> kafkaTemplate(ProducerFactory<String, UserDto> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-
-    @Bean
-    public ProducerFactory<String, UserAuthenticationDto> producerFactory2() {
-        return new DefaultKafkaProducerFactory<>(producerConfig());
-    }
-
-    @Bean
-    public KafkaTemplate<String, UserAuthenticationDto> kafkaTemplate2(ProducerFactory<String, UserAuthenticationDto> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
+    public KafkaTemplate<String, UserAuthenticationDto> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
     }
 }

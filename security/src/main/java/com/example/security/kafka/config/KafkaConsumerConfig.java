@@ -1,6 +1,6 @@
-package com.example.financial.transactions.kafka.consumer;
+package com.example.security.kafka.config;
 
-import com.example.financial.transactions.dto.UserDto;
+import com.example.security.dto.UserAuthenticationDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,23 +23,23 @@ public class KafkaConsumerConfig {
 
 
     @Bean
-    public ConsumerFactory<String, UserDto> consumerFactory() {
-        JsonDeserializer<UserDto> jsonDeserializer = new JsonDeserializer<>(UserDto.class);
+    public ConsumerFactory<String, UserAuthenticationDto> consumerFactory() {
+        JsonDeserializer<UserAuthenticationDto> jsonDeserializer = new JsonDeserializer<>(UserAuthenticationDto.class);
         jsonDeserializer.addTrustedPackages("com.example.financial.transactions.dto");
         DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
-        typeMapper.setIdClassMapping(Map.of("UserDto", UserDto.class)); // Map the specific type
+        typeMapper.setIdClassMapping(Map.of("UserAuthenticationDto", UserAuthenticationDto.class)); // Map the specific type
         jsonDeserializer.setTypeMapper(typeMapper);
 
 
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "transaction-group-id");
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "security-group-id");
         return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), jsonDeserializer);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserDto> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, UserDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, UserAuthenticationDto> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, UserAuthenticationDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }

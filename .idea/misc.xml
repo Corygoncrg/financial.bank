@@ -25,6 +25,7 @@
         <option value="$PROJECT_DIR$/financial.transactions/pom.xml" />
         <option value="$PROJECT_DIR$/users/pom.xml" />
         <option value="$PROJECT_DIR$/transactions/pom.xml" />
+        <option value="$PROJECT_DIR$/security/pom.xml" />
       </list>
     </option>
   </component>

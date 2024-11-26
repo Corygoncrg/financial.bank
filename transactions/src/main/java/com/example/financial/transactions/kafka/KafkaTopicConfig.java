@@ -9,10 +9,19 @@ import org.springframework.stereotype.Component;
 public class KafkaTopicConfig {
 
     @Bean
-    public NewTopic topic() {
-        return TopicBuilder.name("FINANCIAL_BANK_TRANSACTIONS")
+    public NewTopic transactionsRequestTopic() {
+        return TopicBuilder.name("FINANCIAL_BANK_TRANSACTIONS_REQUEST")
                 .partitions(3)
                 .replicas(1)
                 .build();
     }
+
+    @Bean
+    public NewTopic transactionsResponseTopic() {
+        return TopicBuilder.name("FINANCIAL_BANK_TRANSACTIONS_RESPONSE")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
 }

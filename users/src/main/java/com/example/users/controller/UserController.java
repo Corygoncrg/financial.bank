@@ -1,13 +1,11 @@
 package com.example.users.controller;
 
-import com.example.users.dto.authentication.AuthenticationDTO;
 import com.example.users.dto.user.UserDto;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.DeactivateUserResult;
 import com.example.users.model.UpdateUserResult;
 import com.example.users.model.VerifyUserResult;
-import com.example.users.service.LoginService;
 import com.example.users.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +25,6 @@ public class UserController {
     @Autowired
     private UserService service;
 
-    @Autowired
-    private LoginService loginService;
 
     @GetMapping
     public List<UserDto> listUsers() {
@@ -69,15 +65,7 @@ public class UserController {
         };
     }
 
-    @PostMapping("login")
-    public ResponseEntity<?> login(@RequestBody @Valid AuthenticationDTO dto) {
-        var token = loginService.login(dto);
-        if (token != null) {
-            System.out.println(token);
-            return ResponseEntity.ok(token);
-        }
-        return ResponseEntity.badRequest().body("User is not longer active!");
-    }
+
 
     @GetMapping("verify/{uuid}")
     public ResponseEntity<String> verifyUser(@PathVariable String uuid) {

@@ -1,6 +1,5 @@
-package com.example.users.service;
+package com.example.security.service;
 
-import com.example.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthenticationService implements UserDetailsService {
     @Autowired
-    private UserRepository repository;
+    private UserDetailsService userService;
 
     /**
      * Method to find a user in the database and return its details
@@ -20,6 +19,6 @@ public class AuthenticationService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return repository.findByName(username);
+        return userService.loadUserByUsername(username);
     }
 }

@@ -1,24 +1,26 @@
-package com.example.users.service;
+package com.example.security.service;
 
-import com.example.users.dto.authentication.AuthenticationDTO;
-import com.example.users.dto.authentication.TokenJWTDTO;
-import com.example.users.model.User;
-import com.example.users.model.UserStatus;
-import com.example.users.repository.UserRepository;
+import com.example.security.dto.AuthenticationDTO;
+import com.example.security.dto.TokenJWTDTO;
+import com.example.security.kafka.consumer.KafkaConsumer;
+import com.example.security.model.User;
+import com.example.security.model.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoginService {
 
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private TokenService tokenService;
     @Autowired
     private AuthenticationManager manager;
+
+    @Autowired
+    private KafkaConsumer kafkaConsumer;
 
 
     /**
@@ -28,8 +30,8 @@ public class LoginService {
      */
     public TokenJWTDTO login(AuthenticationDTO dto) {
     var authenticationToken = new UsernamePasswordAuthenticationToken(dto.user(), dto.password());
-    var user = userRepository.findByName(authenticationToken.getName());
-    if (user.getStatus() == UserStatus.NOT_ACTIVE) {
+    var user = kafkaConsumer.getUserAuthentication(authenticationToken.getName());
+    if (UserStatus.valueOf(user.status()) == UserStatus.NOT_ACTIVE) {
         return null;
     }
     var authentication = manager.authenticate(authenticationToken);

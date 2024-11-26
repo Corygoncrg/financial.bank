@@ -1,6 +1,6 @@
-package com.example.financial.transactions.kafka;
+package com.example.security.kafka;
 
-import com.example.financial.transactions.dto.UserDto;
+import com.example.security.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 public class KafkaListenerService {
 
     @Autowired
-    private KafkaResponseHandler responseHandler;
+    private KafkaDtoResponseHandler dtoHandler;
 
-    @KafkaListener(topics = "FINANCIAL_BANK_TRANSACTIONS_RESPONSE", groupId = "transactions-group")
+    @KafkaListener(topics = "FINANCIAL_BANK_USERS_RESPONSE", groupId = "transactions-group")
     public void listen(UserDto userDto) {
         System.out.println("Received User from Kafka: " + userDto);
-        responseHandler.setUserDto(userDto);
+        dtoHandler.setUserDto(userDto);
     }
 }
