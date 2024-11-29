@@ -18,8 +18,24 @@ public class KafkaTopicConfig {
     }
 
     @Bean
+    public NewTopic usersRequestDtoTopic() {
+        return TopicBuilder.name("FINANCIAL_BANK_USERS_REQUEST_DTO")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
     public NewTopic usersResponseTopic() {
         return TopicBuilder.name("FINANCIAL_BANK_USERS_RESPONSE")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic usersResponseDtoTopic() {
+        return TopicBuilder.name("FINANCIAL_BANK_USERS_RESPONSE_DTO")
                 .partitions(3)
                 .replicas(1)
                 .build();

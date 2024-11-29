@@ -11,7 +11,7 @@ public class KafkaListenerService {
     @Autowired
     private KafkaDtoResponseHandler dtoHandler;
 
-    @KafkaListener(topics = "FINANCIAL_BANK_USERS_RESPONSE", groupId = "transactions-group")
+    @KafkaListener(topics = "FINANCIAL_BANK_USERS_RESPONSE_DTO", groupId = "security-group-id", containerFactory = "userDtoKafkaListenerContainerFactorySecurity")
     public void listen(UserDto userDto) {
         System.out.println("Received User from Kafka: " + userDto);
         dtoHandler.setUserDto(userDto);

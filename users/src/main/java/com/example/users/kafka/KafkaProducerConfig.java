@@ -30,22 +30,13 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, UserDto> producerFactory() {
+    public ProducerFactory<String, Object> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfig());
     }
 
     @Bean
-    public KafkaTemplate<String, UserDto> kafkaTemplate(ProducerFactory<String, UserDto> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
+    public KafkaTemplate<String, Object> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
     }
 
-    @Bean
-    public ProducerFactory<String, UserAuthenticationDto> producerFactory2() {
-        return new DefaultKafkaProducerFactory<>(producerConfig());
-    }
-
-    @Bean
-    public KafkaTemplate<String, UserAuthenticationDto> kafkaTemplate2(ProducerFactory<String, UserAuthenticationDto> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
-    }
 }

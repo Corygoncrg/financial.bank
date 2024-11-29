@@ -1,8 +1,7 @@
-package com.example.security.kafka.config;
+package com.example.users.kafka;
 
-import com.example.security.dto.UserAuthenticationDto;
-import com.example.security.dto.UserDto;
-import com.example.security.service.JsonStringWrapper;
+import com.example.users.dto.user.UserDto;
+import com.example.users.service.JsonStringWrapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,19 +22,19 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-
     @Bean
     public ConsumerFactory<String, UserDto> userDtoConsumerFactory() {
+
         DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
         typeMapper.setIdClassMapping(Map.of("UserDto", UserDto.class));
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "security-group-id");
 
         JsonDeserializer<UserDto> jsonDeserializer = new JsonDeserializer<>(UserDto.class);
         jsonDeserializer.addTrustedPackages("*");
         jsonDeserializer.setTypeMapper(typeMapper);
 
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "user-group-id");
         return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), jsonDeserializer);
     }
 
@@ -45,7 +44,7 @@ public class KafkaConsumerConfig {
         typeMapper.setIdClassMapping(Map.of("JsonStringWrapper", JsonStringWrapper.class));
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "security-string-wrapper-group-id");
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "users-string-wrapper-group-id");
 
         JsonDeserializer<JsonStringWrapper> jsonDeserializer = new JsonDeserializer<>(JsonStringWrapper.class);
         jsonDeserializer.addTrustedPackages("*");
@@ -55,14 +54,14 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserDto> userDtoKafkaListenerContainerFactorySecurity() {
+    public ConcurrentKafkaListenerContainerFactory<String, UserDto> userDtoKafkaListenerContainerFactoryUsers() {
         ConcurrentKafkaListenerContainerFactory<String, UserDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(userDtoConsumerFactory());
         return factory;
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, JsonStringWrapper> jsonStringWrapperKafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, JsonStringWrapper> jsonStringWrapperKafkaListenerContainerFactoryUsers() {
         ConcurrentKafkaListenerContainerFactory<String, JsonStringWrapper> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(jsonStringWrapperConsumerFactory());
         return factory;

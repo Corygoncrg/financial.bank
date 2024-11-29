@@ -17,7 +17,7 @@ public class KafkaDtoResponseHandler {
         return latch.await(timeout, unit);
     }
 
-    public void setUserDto(com.example.security.dto.UserDto userDto) {
+    public void setUserDto(UserDto userDto) {
         this.userDto = userDto;
         latch.countDown();
     }
