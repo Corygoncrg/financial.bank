@@ -1,10 +1,8 @@
-package com.example.security.service;
+package com.example.shared.service;
 
 import lombok.Data;
 
 @Data
 public class JsonStringWrapper {
-    // Getters and setters
     private String value;
-
 }

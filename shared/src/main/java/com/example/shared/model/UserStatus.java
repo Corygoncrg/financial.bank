@@ -1,4 +1,4 @@
-package com.example.users.model;
+package com.example.shared.model;
 
 public enum UserStatus {
     ACTIVE,

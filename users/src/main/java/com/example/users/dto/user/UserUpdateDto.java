@@ -1,6 +1,6 @@
 package com.example.users.dto.user;
 
-import com.example.users.model.UserStatus;
+import com.example.shared.model.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 

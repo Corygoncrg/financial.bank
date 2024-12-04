@@ -1,6 +1,8 @@
 package com.example.users.service;
 
-import com.example.users.dto.user.UserDto;
+import com.example.shared.dto.UserDto;
+import com.example.shared.model.User;
+import com.example.shared.model.UserStatus;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.*;
@@ -28,6 +30,9 @@ public class UserService {
     @Autowired
     private UserValidatorRepository validatorRepository;
 
+    @Autowired
+    private UserFactory factory;
+
     public List<User> listUsers() {
          return repository.findAllUsers();
     }
@@ -37,14 +42,16 @@ public class UserService {
             return false;
         }
 
-        var user = new User(dto);
+        var user = factory.createUser(dto);
         System.out.println("Registered user: " + user);
+        //todo kafkaSend user to receive validator
         UserValidator validator = new UserValidator(user);
 
         emailService.sendPasswordEmail(user, validator);
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 
         repository.save(user);
+        //todo kafka
         validatorRepository.save(validator);
         System.out.println(validator.getUuid());
 
@@ -61,7 +68,7 @@ public class UserService {
         }
 
         var user = repository.getReferenceById(dto.id());
-        user.update(dto);
+        factory.updateUser(user, dto);
         repository.save(user);
 
         return UpdateUserResult.SUCCESS;
@@ -87,7 +94,7 @@ public class UserService {
         try {
             UUID.fromString(uuid);
             var validatorOptional = validatorRepository.findByUuid(uuid);
-
+//todo kafka
             if (validatorOptional.isEmpty()){
                 return VerifyUserResult.USER_NOT_VERIFIED;
             }
@@ -95,6 +102,7 @@ public class UserService {
             var validator = validatorOptional.get();
 
             if (validator.getExpirationDate().compareTo(Instant.now()) < 0) {
+                //todo kafka
                 validatorRepository.delete(validator);
                 return VerifyUserResult.EXPIRED_VALIDATION_DATE;
             }

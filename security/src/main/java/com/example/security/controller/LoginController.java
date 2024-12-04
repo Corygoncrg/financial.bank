@@ -1,6 +1,7 @@
 package com.example.security.controller;
 
 import com.example.security.dto.AuthenticationDTO;
+import com.example.security.dto.TokenJWTDTO;
 import com.example.security.service.LoginService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,6 @@
-package com.example.users.model;
+package com.example.shared.model;
 
 
-import com.example.users.dto.user.UserRegisterDto;
-import com.example.users.dto.user.UserUpdateDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +16,7 @@ import java.util.Random;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User  implements UserDetails {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,28 +28,46 @@ public class User  implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    public User(UserRegisterDto dto) {
-        this.name = dto.username();
-        this.email = dto.email();
-        this.password = String.format("%06d", new Random().nextInt(999999));
-        this.status = UserStatus.PENDING;
+
+    public User(String name, String email, String password, UserStatus status) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.status = status;
     }
+//    public User(UserRegisterDto dto) {
+//        this.name = dto.username();
+//        this.email = dto.email();
+//        this.password = String.format("%06d", new Random().nextInt(999999));
+//        this.status = UserStatus.PENDING;
+//    }
 
     public void deactivate() {
         this.status = UserStatus.NOT_ACTIVE;
     }
 
-    public void update(UserUpdateDto dto) {
-        if (dto.name() != null) {
-            this.name = dto.name();
+
+    public void update(String name, String email, UserStatus status) {
+        if (name != null) {
+            this.name = name;
         }
-        if (dto.email() != null) {
-            this.email = dto.email();
+        if (email != null) {
+            this.email = email;
         }
-        if (dto.status() != null) {
-            this.status = dto.status();
+        if (status != null) {
+            this.status = status;
         }
     }
+//    public void update(UserUpdateDto dto) {
+//        if (dto.name() != null) {
+//            this.name = dto.name();
+//        }
+//        if (dto.email() != null) {
+//            this.email = dto.email();
+//        }
+//        if (dto.status() != null) {
+//            this.status = dto.status();
+//        }
 
     public void validate() {
         this.status = UserStatus.ACTIVE;
@@ -66,6 +82,5 @@ public class User  implements UserDetails {
     public String getUsername() {
         return name;
     }
-
 
 }

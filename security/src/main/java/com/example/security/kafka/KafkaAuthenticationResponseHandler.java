@@ -1,6 +1,6 @@
 package com.example.security.kafka;
 
-import com.example.security.dto.UserAuthenticationDto;
+import com.example.shared.dto.UserAuthenticationDto;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ public class KafkaAuthenticationResponseHandler {
         return latch.await(timeout, unit);
     }
 
-    public void setUserDto(UserAuthenticationDto authenticationDto) {
+    public void setAuthDto(UserAuthenticationDto authenticationDto) {
         this.authenticationDto = authenticationDto;
         latch.countDown();
     }

@@ -1,6 +1,6 @@
 package com.example.users.controller;
 
-import com.example.users.dto.user.UserDto;
+import com.example.shared.dto.UserDto;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.DeactivateUserResult;

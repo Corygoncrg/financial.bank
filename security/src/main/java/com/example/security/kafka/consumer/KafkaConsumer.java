@@ -1,11 +1,11 @@
 package com.example.security.kafka.consumer;
 
-import com.example.security.dto.UserAuthenticationDto;
-import com.example.security.dto.UserDto;
 import com.example.security.kafka.KafkaAuthenticationResponseHandler;
 import com.example.security.kafka.KafkaDtoResponseHandler;
-import com.example.security.service.JsonStringWrapper;
 import com.example.security.service.TokenService;
+import com.example.shared.dto.UserAuthenticationDto;
+import com.example.shared.dto.UserDto;
+import com.example.shared.service.JsonStringWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;

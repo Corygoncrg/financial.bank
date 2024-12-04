@@ -1,6 +1,8 @@
 package com.example.users.service;
 
-import com.example.users.dto.user.UserDto;
+import com.example.shared.dto.UserDto;
+import com.example.shared.model.User;
+import com.example.shared.model.UserStatus;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.*;
@@ -32,6 +34,8 @@ class UserServiceTest {
     @Mock
     UserValidatorRepository validatorRepository;
 
+    @Mock
+    UserFactory factory;
 
     @InjectMocks
     UserService service;

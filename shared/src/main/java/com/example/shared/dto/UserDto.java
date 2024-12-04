@@ -1,9 +1,8 @@
-package com.example.users.dto.user;
+package com.example.shared.dto;
 
-import com.example.users.model.User;
+import com.example.shared.model.User;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
 import java.util.List;
 
 public record UserDto(Long id, String name, String email, String status, List<String> authorities) {

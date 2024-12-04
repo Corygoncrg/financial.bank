@@ -1,7 +1,7 @@
-package com.example.users.kafka;
+package com.example.users.kafka.config;
 
-import com.example.users.dto.user.UserDto;
-import com.example.users.service.JsonStringWrapper;
+import com.example.shared.dto.UserDto;
+import com.example.shared.service.JsonStringWrapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;

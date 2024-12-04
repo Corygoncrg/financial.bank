@@ -1,7 +1,5 @@
-package com.example.users.kafka;
+package com.example.users.kafka.config;
 
-import com.example.users.dto.user.UserAuthenticationDto;
-import com.example.users.dto.user.UserDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;

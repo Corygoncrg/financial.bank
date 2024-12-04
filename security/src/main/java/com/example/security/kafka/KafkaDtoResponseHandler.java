@@ -1,6 +1,6 @@
 package com.example.security.kafka;
 
-import com.example.security.dto.UserDto;
+import com.example.shared.dto.UserDto;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
