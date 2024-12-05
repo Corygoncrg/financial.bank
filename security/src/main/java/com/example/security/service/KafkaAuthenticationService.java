@@ -13,7 +13,6 @@ public class KafkaAuthenticationService {
 
     public UserImpl getUserAuthentication(String subject) {
         var dto = kafkaConsumer.requestUserByName(subject);
-        var user = new UserImpl(dto);
-        return user;
+        return new UserImpl(dto);
     }
 }

@@ -1,10 +1,10 @@
 package com.example.security.kafka.consumer;
 
 import com.example.security.kafka.KafkaAuthenticationResponseHandler;
-import com.example.security.kafka.KafkaDtoResponseHandler;
 import com.example.security.service.TokenService;
 import com.example.shared.dto.UserAuthenticationDto;
 import com.example.shared.dto.UserDto;
+import com.example.shared.kafka.responseHandler.KafkaDtoResponseHandler;
 import com.example.shared.service.JsonStringWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -51,7 +51,7 @@ public class KafkaConsumer {
     public UserAuthenticationDto getUserAuthentication(String token) {
         String userId = tokenService.getSubject(token);
         try {
-            kafkaTemplate.send("FINANCIAL_BANK_USERS_REQUEST_AUTH", token);
+            kafkaTemplate.send("FINANCIAL_BANK_USERS_REQUEST_AUTH", userId);
 
             if (!authenticationHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
                 throw new RuntimeException("Timeout waiting for user details from Kafka");

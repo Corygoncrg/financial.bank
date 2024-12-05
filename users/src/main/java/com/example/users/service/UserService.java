@@ -3,11 +3,12 @@ package com.example.users.service;
 import com.example.shared.dto.UserDto;
 import com.example.shared.model.User;
 import com.example.shared.model.UserStatus;
+import com.example.shared.model.UserValidator;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
+import com.example.users.kafka.KafkaUserValidatorService;
 import com.example.users.model.*;
 import com.example.users.repository.UserRepository;
-import com.example.users.repository.UserValidatorRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +29,7 @@ public class UserService {
     private EmailService emailService;
 
     @Autowired
-    private UserValidatorRepository validatorRepository;
+    private KafkaUserValidatorService kafkaUserValidatorService;
 
     @Autowired
     private UserFactory factory;
@@ -44,7 +45,6 @@ public class UserService {
 
         var user = factory.createUser(dto);
         System.out.println("Registered user: " + user);
-        //todo kafkaSend user to receive validator
         UserValidator validator = new UserValidator(user);
 
         emailService.sendPasswordEmail(user, validator);
@@ -52,7 +52,8 @@ public class UserService {
 
         repository.save(user);
         //todo kafka
-        validatorRepository.save(validator);
+
+        kafkaUserValidatorService.saveValidator(validator);
         System.out.println(validator.getUuid());
 
         return true;
@@ -93,17 +94,16 @@ public class UserService {
     public VerifyUserResult verifyUser (String uuid) {
         try {
             UUID.fromString(uuid);
-            var validatorOptional = validatorRepository.findByUuid(uuid);
-//todo kafka
-            if (validatorOptional.isEmpty()){
-                return VerifyUserResult.USER_NOT_VERIFIED;
-            }
+            var validator = kafkaUserValidatorService.findByUuid(uuid);
+//            if (validator.isEmpty()){
+//                return VerifyUserResult.USER_NOT_VERIFIED;
+//            }
 
-            var validator = validatorOptional.get();
 
             if (validator.getExpirationDate().compareTo(Instant.now()) < 0) {
                 //todo kafka
-                validatorRepository.delete(validator);
+//                validatorRepository.delete(validator);
+                kafkaUserValidatorService.deleteValidator(validator);
                 return VerifyUserResult.EXPIRED_VALIDATION_DATE;
             }
 

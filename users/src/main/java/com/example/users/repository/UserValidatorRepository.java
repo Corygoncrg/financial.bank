@@ -1,6 +1,6 @@
 package com.example.users.repository;
 
-import com.example.users.model.UserValidator;
+import com.example.shared.model.UserValidator;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

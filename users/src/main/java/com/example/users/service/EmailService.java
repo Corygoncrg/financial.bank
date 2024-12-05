@@ -1,7 +1,7 @@
 package com.example.users.service;
 
 import com.example.shared.model.User;
-import com.example.users.model.UserValidator;
+import com.example.shared.model.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
