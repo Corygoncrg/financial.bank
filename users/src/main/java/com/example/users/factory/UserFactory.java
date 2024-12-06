@@ -1,14 +1,14 @@
-package com.example.users.service;
+package com.example.users.factory;
 
 import com.example.shared.model.User;
 import com.example.shared.model.UserStatus;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Random;
 
-@Service
+@Component
 public class UserFactory {
 
     public User createUser(UserRegisterDto dto) {

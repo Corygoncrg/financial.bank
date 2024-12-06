@@ -1,7 +1,7 @@
 package com.example.security.service;
 
 import com.example.security.kafka.consumer.KafkaConsumer;
-import com.example.security.model.UserImpl;
+import com.example.shared.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +11,8 @@ public class KafkaAuthenticationService {
     @Autowired
     private KafkaConsumer kafkaConsumer;
 
-    public UserImpl getUserAuthentication(String subject) {
+    public User getUserAuthentication(String subject) {
         var dto = kafkaConsumer.requestUserByName(subject);
-        return new UserImpl(dto);
+        return new User(dto);
     }
 }

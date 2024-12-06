@@ -6,6 +6,7 @@ import com.example.shared.model.UserStatus;
 import com.example.shared.model.UserValidator;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
+import com.example.users.factory.UserFactory;
 import com.example.users.kafka.KafkaUserValidatorService;
 import com.example.users.model.*;
 import com.example.users.repository.UserRepository;
@@ -51,8 +52,6 @@ public class UserService {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 
         repository.save(user);
-        //todo kafka
-
         kafkaUserValidatorService.saveValidator(validator);
         System.out.println(validator.getUuid());
 

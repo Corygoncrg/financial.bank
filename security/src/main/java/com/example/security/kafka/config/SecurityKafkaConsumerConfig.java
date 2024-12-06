@@ -2,6 +2,7 @@ package com.example.security.kafka.config;
 
 import com.example.shared.dto.UserAuthenticationDto;
 import com.example.shared.dto.UserDto;
+import com.example.shared.dto.UserValidatorDto;
 import com.example.shared.kafka.config.KafkaConsumerConfig;
 import com.example.shared.service.JsonStringWrapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +17,6 @@ public class SecurityKafkaConsumerConfig extends KafkaConsumerConfig {
     public SecurityKafkaConsumerConfig(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         super(bootstrapServers);
     }
-
 
     @Bean
     public ConsumerFactory<String, UserDto> userDtoConsumerFactory() {
@@ -34,6 +34,11 @@ public class SecurityKafkaConsumerConfig extends KafkaConsumerConfig {
     }
 
     @Bean
+    public ConsumerFactory<String, UserValidatorDto> userValidatorDtoConsumerFactory() {
+        return createConsumerFactory("security-validator-group-id", UserValidatorDto.class);
+    }
+
+    @Bean
     public ConcurrentKafkaListenerContainerFactory<String, UserDto> userDtoKafkaListenerContainerFactory() {
         return createListenerContainerFactory(userDtoConsumerFactory());
     }
@@ -46,5 +51,10 @@ public class SecurityKafkaConsumerConfig extends KafkaConsumerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, JsonStringWrapper> jsonStringWrapperKafkaListenerContainerFactory() {
         return createListenerContainerFactory(jsonStringWrapperConsumerFactory());
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, UserValidatorDto> userValidatorDtoKafkaListenerContainerFactory() {
+        return createListenerContainerFactory(userValidatorDtoConsumerFactory());
     }
 }

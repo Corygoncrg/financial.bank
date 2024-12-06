@@ -18,7 +18,7 @@ public class KafkaConsumer {
     @Autowired
     private UserRepository repository;
 
-    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST", groupId = "user-group-id", containerFactory = "userDtoKafkaListenerContainerFactoryUsers")
+    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST", groupId = "user-group-id", containerFactory = "userDtoKafkaListenerContainerFactory")
     public void receiveToken(String userId) {
         var user = repository.findByName(userId);
 
@@ -26,7 +26,7 @@ public class KafkaConsumer {
         kafkaTemplate.send("FINANCIAL_BANK_USERS_RESPONSE", userDto);
     }
 
-    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST_DTO", groupId = "users-string-wrapper-group-id", containerFactory = "jsonStringWrapperKafkaListenerContainerFactoryUsers")
+    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST_DTO", groupId = "users-string-wrapper-group-id", containerFactory = "jsonStringWrapperKafkaListenerContainerFactory")
     public void getUserByUsername(JsonStringWrapper message) {
         var user = repository.findByName(message.getValue());
         if (user == null) return;
@@ -35,7 +35,7 @@ public class KafkaConsumer {
         kafkaTemplate.send("FINANCIAL_BANK_USERS_RESPONSE_DTO", userDto);
     }
 
-    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST_AUTH", groupId = "auth-group-id", containerFactory = "jsonStringWrapperKafkaListenerContainerFactoryUsers")
+    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST_AUTH", groupId = "auth-group-id", containerFactory = "jsonStringWrapperKafkaListenerContainerFactory")
     public void getUserAuthentication(JsonStringWrapper message) {
         var user = repository.findByName(message.getValue());
         if (user == null) return;

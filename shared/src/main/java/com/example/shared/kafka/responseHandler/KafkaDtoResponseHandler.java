@@ -3,11 +3,12 @@ package com.example.shared.kafka.responseHandler;
 import com.example.shared.dto.UserDto;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@Component
+@Service
 public class KafkaDtoResponseHandler {
     private final CountDownLatch latch = new CountDownLatch(1);
     @Getter

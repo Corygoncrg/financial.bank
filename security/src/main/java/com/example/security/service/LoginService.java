@@ -3,8 +3,8 @@ package com.example.security.service;
 import com.example.security.dto.AuthenticationDTO;
 import com.example.security.dto.TokenJWTDTO;
 import com.example.security.kafka.consumer.KafkaConsumer;
-import com.example.security.model.UserImpl;
 import com.example.shared.dto.UserDto;
+import com.example.shared.model.User;
 import com.example.shared.model.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.DisabledException;
@@ -48,7 +48,7 @@ public class LoginService {
     }
 
     private TokenJWTDTO performAuthentication(AuthenticationDTO dto, List<SimpleGrantedAuthority> authorities) {
-        var user = new UserImpl();
+        var user = new User();
         user.setName(dto.user());
         user.setPassword(dto.password());
 

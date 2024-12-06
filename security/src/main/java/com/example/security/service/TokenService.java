@@ -5,7 +5,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.example.security.model.UserImpl;
+import com.example.shared.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,15 +22,15 @@ public class TokenService {
 
     /**
      * Method to create a token when a user is in sent
-     * @param userImpl User object to get user from
+     * @param user User object to get user from
      * @return String
      */
-    public String createToken(UserImpl userImpl) {
+    public String createToken(User user) {
         try {
             var algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
                     .withIssuer("com.example")
-                    .withSubject(userImpl.getUsername())
+                    .withSubject(user.getUsername())
                     .withExpiresAt(expirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception){

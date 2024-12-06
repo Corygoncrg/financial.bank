@@ -6,9 +6,10 @@ import com.example.shared.model.UserStatus;
 import com.example.shared.model.UserValidator;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
+import com.example.users.factory.UserFactory;
+import com.example.users.kafka.KafkaUserValidatorService;
 import com.example.users.model.*;
 import com.example.users.repository.UserRepository;
-import com.example.users.repository.UserValidatorRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,7 @@ class UserServiceTest {
     EmailService emailService;
 
     @Mock
-    UserValidatorRepository validatorRepository;
+    KafkaUserValidatorService validatorRepository;
 
     @Mock
     UserFactory factory;

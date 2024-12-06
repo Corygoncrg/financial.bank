@@ -2,8 +2,6 @@ package com.example.shared.kafka.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,11 +16,15 @@ public class KafkaProducerConfig {
 
     private final String bootstrapServers;
 
+    public KafkaProducerConfig() {
+        bootstrapServers = "";
+    }
+
     public KafkaProducerConfig(String bootstrapServers) {
         this.bootstrapServers = bootstrapServers;
     }
 
-    @Bean
+
     public Map<String, Object> producerConfig() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -31,13 +33,11 @@ public class KafkaProducerConfig {
         return props;
     }
 
-    @Bean
-    public ProducerFactory<String, Object> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfig());
+    public ProducerFactory<String, Object> producerFactory(Map<String, Object> config) {
+        return new DefaultKafkaProducerFactory<>(config);
     }
 
-    @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> factory) {
+        return new KafkaTemplate<>(factory);
     }
 }

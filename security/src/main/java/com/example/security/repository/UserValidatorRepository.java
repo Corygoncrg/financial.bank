@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface UserValidatorRepository extends JpaRepository<UserValidator, Long> {
 
-    Optional<com.example.shared.model.UserValidator> findByUuid (String uuid);
+    Optional<UserValidator> findByUuid (String uuid);
 }

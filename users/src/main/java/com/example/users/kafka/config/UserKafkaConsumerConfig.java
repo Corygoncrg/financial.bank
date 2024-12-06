@@ -1,6 +1,7 @@
 package com.example.users.kafka.config;
 
 import com.example.shared.dto.UserDto;
+import com.example.shared.dto.UserValidatorDto;
 import com.example.shared.kafka.config.KafkaConsumerConfig;
 import com.example.shared.service.JsonStringWrapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,10 @@ public class UserKafkaConsumerConfig extends KafkaConsumerConfig {
     public ConsumerFactory<String, JsonStringWrapper> jsonStringWrapperConsumerFactory() {
         return createConsumerFactory("user-string-wrapper-group-id", JsonStringWrapper.class);
     }
+    @Bean
+    public ConsumerFactory<String, UserValidatorDto> userValidatorDtoConsumerFactory() {
+        return createConsumerFactory("user-validator-group-id", UserValidatorDto.class);
+    }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, UserDto> userDtoKafkaListenerContainerFactory() {
@@ -34,5 +39,9 @@ public class UserKafkaConsumerConfig extends KafkaConsumerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, JsonStringWrapper> jsonStringWrapperKafkaListenerContainerFactory() {
         return createListenerContainerFactory(jsonStringWrapperConsumerFactory());
+    }
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, UserValidatorDto> userValidatorDtoKafkaListenerContainerFactory() {
+        return createListenerContainerFactory(userValidatorDtoConsumerFactory());
     }
 }

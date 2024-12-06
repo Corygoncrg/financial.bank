@@ -19,7 +19,7 @@ public class SecurityConfigurations {
         return http
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
-                    req.requestMatchers("users", "users/verify/**", "/v3/api-docs/**", "/swagger-ui/index.html", "/swagger-ui/**").permitAll();
+                    req.requestMatchers("users", "users/verify/**").permitAll();
                 })
                 .build();
     }
