@@ -1,6 +1,7 @@
 package com.example.users.kafka;
 
 import com.example.shared.dto.UserValidatorDto;
+import com.example.shared.exception.NoUuidFoundException;
 import com.example.shared.kafka.responseHandler.KafkaValidatorResponseHandler;
 import com.example.shared.model.UserValidator;
 import com.example.shared.service.JsonStringWrapper;
@@ -30,10 +31,10 @@ public class KafkaUserValidatorService {
         try {
             var jsonMessage = new JsonStringWrapper();
             jsonMessage.setValue(uuid);
-            kafkaTemplate.send("FINANCIAL_BANK_SECURITY_REQUEST_VALIDATOR", uuid);
+            kafkaTemplate.send("FINANCIAL_BANK_SECURITY_REQUEST_VALIDATOR", jsonMessage);
 
         if (!validatorResponseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
-            throw new RuntimeException("Timeout waiting for validator from Kafka");
+            throw new NoUuidFoundException("Timeout waiting for validator from Kafka");
         }
 
             return new UserValidator(validatorResponseHandler.getUserValidatorDto());

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.example.shared", "com.example.security"})
-@EntityScan(basePackages = {"com.example.shared.model", "com.example.security.model"})
+@EntityScan(basePackages = {"com.example.shared.model"})
 public class SecurityApplication {
 
     public static void main(String[] args) {

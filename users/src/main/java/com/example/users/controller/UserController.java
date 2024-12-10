@@ -1,6 +1,7 @@
 package com.example.users.controller;
 
 import com.example.shared.dto.UserDto;
+import com.example.shared.service.JsonStringWrapper;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.DeactivateUserResult;
@@ -8,11 +9,10 @@ import com.example.users.model.UpdateUserResult;
 import com.example.users.model.VerifyUserResult;
 import com.example.users.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -81,11 +81,11 @@ public class UserController {
         };
     }
 
-    @GetMapping("current-user")
-    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-
-        var user = service.checkCurrentUser(userDetails);
-
+    @PostMapping("current-user")
+    public ResponseEntity<UserDto> getCurrentUser(@RequestBody @NotNull String username) {
+        var json = new JsonStringWrapper();
+        json.setValue(username);
+        var user = service.checkCurrentUser(json.getValue());
         return ResponseEntity.ok(user);
     }
 }

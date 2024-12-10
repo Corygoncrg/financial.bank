@@ -21,16 +21,19 @@ public class KafkaUserValidatorListenerService {
     @Autowired
     private UserValidatorRepository validatorRepository;
 
-    @KafkaListener(topics = "FINANCIAL_BANK_SECURITY_REQUEST_SAVE_VALIDATOR", groupId = "security-group-id", containerFactory = "userDtoKafkaListenerContainerFactory")
+    @KafkaListener(topics = "FINANCIAL_BANK_SECURITY_REQUEST_SAVE_VALIDATOR", groupId = "security-validator-group-id", containerFactory = "userValidatorDtoKafkaListenerContainerFactory")
     public void saveValidator(UserValidatorDto dto) {
         var validator = new UserValidator(dto);
         validatorRepository.save(validator);
-        kafkaTemplate.send("FINANCIAL_BANK_SECURITY_RESPONSE_SAVE_VALIDATOR", "Validator for user " + dto.idUser() + " has been created");
+        kafkaTemplate.send("FINANCIAL_BANK_SECURITY_RESPONSE_SAVE_VALIDATOR", new UserValidatorDto(validator));
     }
     @KafkaListener(topics = "FINANCIAL_BANK_SECURITY_REQUEST_VALIDATOR", groupId = "security-string-wrapper-group-id", containerFactory = "jsonStringWrapperKafkaListenerContainerFactory")
     public void findValidatorByUuid(JsonStringWrapper jsonMessage) {
-        var validator = validatorRepository.findByUuid(jsonMessage.getValue());
-        kafkaTemplate.send("FINANCIAL_BANK_SECURITY_RESPONSE_VALIDATOR", validator);
+        var validatorOptional = validatorRepository.findByUuid(jsonMessage.getValue());
+        if (validatorOptional.isPresent()) {
+        var dto = new UserValidatorDto(validatorOptional.get());
+        kafkaTemplate.send("FINANCIAL_BANK_SECURITY_RESPONSE_VALIDATOR", dto);
+        }
     }
 
     @KafkaListener(topics = "FINANCIAL_BANK_SECURITY_REQUEST_DELETE_VALIDATOR", groupId = "security-validator-group-id", containerFactory = "userValidatorDtoKafkaListenerContainerFactory")
