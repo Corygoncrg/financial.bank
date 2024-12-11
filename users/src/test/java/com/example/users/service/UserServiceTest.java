@@ -8,7 +8,9 @@ import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.factory.UserFactory;
 import com.example.users.kafka.KafkaUserValidatorService;
-import com.example.users.model.*;
+import com.example.users.model.DeactivateUserResult;
+import com.example.users.model.UpdateUserResult;
+import com.example.users.model.VerifyUserResult;
 import com.example.users.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -227,10 +229,9 @@ class UserServiceTest {
         var user = mock(User.class);
         var dto = new UserDto(user);
 
-        when(details.getUsername()).thenReturn(username);
         when(repository.findByName(username)).thenReturn(user);
 
-        var result = service.checkCurrentUser(details);
+        var result = service.checkCurrentUser(username);
 
         assertEquals(dto, result);
 

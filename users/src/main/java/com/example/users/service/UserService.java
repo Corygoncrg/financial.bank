@@ -1,6 +1,7 @@
 package com.example.users.service;
 
 import com.example.shared.dto.UserDto;
+import com.example.shared.exception.NoUuidFoundException;
 import com.example.shared.model.User;
 import com.example.shared.model.UserStatus;
 import com.example.shared.model.UserValidator;
@@ -8,17 +9,21 @@ import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.factory.UserFactory;
 import com.example.users.kafka.KafkaUserValidatorService;
-import com.example.users.model.*;
+import com.example.users.model.DeactivateUserResult;
+import com.example.users.model.RegisterUserResult;
+import com.example.users.model.UpdateUserResult;
+import com.example.users.model.VerifyUserResult;
 import com.example.users.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Service
 public class UserService {
@@ -39,9 +44,11 @@ public class UserService {
          return repository.findAllUsers();
     }
 
-    public boolean register(@Valid UserRegisterDto dto) {
-        if (repository.existsByName(dto.username()) || repository.existsByEmail(dto.email())) {
-            return false;
+    public RegisterUserResult register(@Valid UserRegisterDto dto) {
+        boolean userExistsOrPending = checkAndHandleExistingUser(dto.username(), repository::existsByName, repository::findByName) ||
+                checkAndHandleExistingUser(dto.email(), repository::existsByEmail, repository::findByEmail);
+        if (userExistsOrPending) {
+            return RegisterUserResult.USER_ALREADY_EXISTS;
         }
 
         var user = factory.createUser(dto);
@@ -55,7 +62,28 @@ public class UserService {
         kafkaUserValidatorService.saveValidator(validator);
         System.out.println(validator.getUuid());
 
-        return true;
+        return RegisterUserResult.SUCCESS;
+    }
+
+    private boolean checkAndHandleExistingUser(String value, Predicate<String> existsCheck, Function<String, User> findUser) {
+        if (existsCheck.test(value)) {
+
+            var user = findUser.apply(value);
+            if (user.getStatus() == UserStatus.PENDING) {
+                sendNewVerificationKey(user);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void sendNewVerificationKey(User user) {
+        var optionalValidator = kafkaUserValidatorService.findByUserId(user.getId());
+        if (optionalValidator == null) {
+            UserValidator validator = new UserValidator(user);
+            emailService.sendVerificationKey(user, validator);
+            kafkaUserValidatorService.saveValidator(validator);
+        }
     }
 
     public UpdateUserResult updateUser (UserUpdateDto dto) {
@@ -64,7 +92,10 @@ public class UserService {
         }
 
         if (repository.existsByEmail(dto.email())) {
-            return UpdateUserResult.EMAIL_CONFLICT;
+            var user = repository.findByEmail(dto.email());
+            if (user.getStatus() != UserStatus.PENDING) {
+                return UpdateUserResult.EMAIL_CONFLICT;
+            }
         }
 
         var user = repository.getReferenceById(dto.id());
@@ -93,15 +124,9 @@ public class UserService {
     public VerifyUserResult verifyUser (String uuid) {
         try {
             UUID.fromString(uuid);
-            var validator = kafkaUserValidatorService.findByUuid(uuid);
-//            if (validator.isEmpty()){
-//                return VerifyUserResult.USER_NOT_VERIFIED;
-//            }
-
+                var validator = kafkaUserValidatorService.findByUuid(uuid);
 
             if (validator.getExpirationDate().compareTo(Instant.now()) < 0) {
-                //todo kafka
-//                validatorRepository.delete(validator);
                 kafkaUserValidatorService.deleteValidator(validator);
                 return VerifyUserResult.EXPIRED_VALIDATION_DATE;
             }
@@ -112,13 +137,17 @@ public class UserService {
 
             return VerifyUserResult.SUCCESS;
 
-        } catch (IllegalArgumentException e) {
+        }
+        catch (NoUuidFoundException e) {
+            return VerifyUserResult.USER_NOT_VERIFIED;
+        }
+        catch (IllegalArgumentException e) {
             return VerifyUserResult.INVALID_UUID_FORMAT;
         }
     }
 
-    public UserDto checkCurrentUser(UserDetails userDetails) {
-        User user = repository.findByName(userDetails.getUsername());
+    public UserDto checkCurrentUser(String username) {
+        User user = repository.findByName(username);
         return new UserDto(user);
     }
 }

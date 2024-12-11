@@ -17,9 +17,22 @@ public class EmailService {
     public void sendPasswordEmail(User user, UserValidator validator) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(user.getEmail());
-        msg.setSubject("Test email");
+        msg.setSubject("Email verification");
         msg.setText("Dear " + user.getName() + ", your password has been set to: " + user.getPassword() +
                 "\nYour validation key is: " + validator.getUuid());
+        try {
+            mailSender.send(msg);
+        }
+        catch (MailException ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    public void sendVerificationKey(User user, UserValidator validator) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(user.getEmail());
+        msg.setSubject("New verification key");
+        msg.setText("Dear " + user.getName() + ", Your new validation key is: " + validator.getUuid());
         try {
             mailSender.send(msg);
         }

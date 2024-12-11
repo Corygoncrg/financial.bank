@@ -10,44 +10,44 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic securitySaveValidatorRequestTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_SECURITY_REQUEST_SAVE_VALIDATOR")
-                .partitions(2)
-                .replicas(1)
-                .build();
+        return topicBuilder("FINANCIAL_BANK_SECURITY_REQUEST_SAVE_VALIDATOR");
     }
+
     @Bean
     public NewTopic securitySaveValidatorResponseTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_SECURITY_RESPONSE_SAVE_VALIDATOR")
-                .partitions(2)
-                .replicas(1)
-                .build();
+        return topicBuilder("FINANCIAL_BANK_SECURITY_RESPONSE_SAVE_VALIDATOR");
     }
+
     @Bean
     public NewTopic securityDeleteValidatorRequestTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_SECURITY_REQUEST_DELETE_VALIDATOR")
-                .partitions(2)
-                .replicas(1)
-                .build();
+        return topicBuilder("FINANCIAL_BANK_SECURITY_REQUEST_DELETE_VALIDATOR");
     }
+
     @Bean
     public NewTopic securityDeleteValidatorResponseTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_SECURITY_RESPONSE_DELETE_VALIDATOR")
-                .partitions(2)
-                .replicas(1)
-                .build();
+        return topicBuilder("FINANCIAL_BANK_SECURITY_RESPONSE_DELETE_VALIDATOR");
     }
 
     @Bean
     public NewTopic securityValidatorRequestTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_SECURITY_REQUEST_VALIDATOR")
-                .partitions(2)
-                .replicas(1)
-                .build();
+        return topicBuilder("FINANCIAL_BANK_SECURITY_REQUEST_VALIDATOR");
     }
 
     @Bean
     public NewTopic securityValidatorResponseTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_SECURITY_RESPONSE_VALIDATOR")
+        return topicBuilder("FINANCIAL_BANK_SECURITY_RESPONSE_VALIDATOR");
+    }
+    @Bean
+    public NewTopic securityValidatorRequestKeyTopic() {
+        return topicBuilder("FINANCIAL_BANK_SECURITY_REQUEST_VALIDATOR_KEY");
+    }
+    @Bean
+    public NewTopic securityValidatorResponseKeyTopic() {
+        return topicBuilder("FINANCIAL_BANK_SECURITY_RESPONSE_VALIDATOR_KEY");
+    }
+
+    private static NewTopic topicBuilder(String topic) {
+        return TopicBuilder.name(topic)
                 .partitions(2)
                 .replicas(1)
                 .build();

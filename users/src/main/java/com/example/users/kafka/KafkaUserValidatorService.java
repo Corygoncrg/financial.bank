@@ -49,4 +49,22 @@ public class KafkaUserValidatorService {
         var dto = new UserValidatorDto(validator);
         kafkaTemplate.send("FINANCIAL_BANK_SECURITY_REQUEST_DELETE_VALIDATOR", dto);
     }
+
+    public UserValidator findByUserId(Long id) {
+        try {
+            var jsonMessage = new JsonStringWrapper();
+            jsonMessage.setValue(String.valueOf(id));
+            kafkaTemplate.send("FINANCIAL_BANK_SECURITY_REQUEST_VALIDATOR_KEY", jsonMessage);
+
+            if (!validatorResponseHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
+                throw new NoUuidFoundException("Timeout waiting for validator from Kafka");
+            }
+
+            return new UserValidator(validatorResponseHandler.getUserValidatorDto());
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while waiting for Kafka response", e);
+        }
+    }
 }

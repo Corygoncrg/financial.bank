@@ -15,7 +15,6 @@ public class KafkaUserValidatorListenerService {
 
     @Autowired
     @Qualifier("securityKafkaTemplate")
-
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Autowired
@@ -33,6 +32,15 @@ public class KafkaUserValidatorListenerService {
         if (validatorOptional.isPresent()) {
         var dto = new UserValidatorDto(validatorOptional.get());
         kafkaTemplate.send("FINANCIAL_BANK_SECURITY_RESPONSE_VALIDATOR", dto);
+        }
+    }
+
+    @KafkaListener(topics = "FINANCIAL_BANK_SECURITY_REQUEST_VALIDATOR_KEY", groupId = "security-string-wrapper-group-id", containerFactory = "jsonStringWrapperKafkaListenerContainerFactory")
+    public void findValidatorByUserId(JsonStringWrapper jsonMessage) {
+        var validatorOptional = validatorRepository.findByIdUser_Id(Long.valueOf(jsonMessage.getValue()));
+        if (validatorOptional.isPresent()) {
+        var dto = new UserValidatorDto(validatorOptional.get());
+        kafkaTemplate.send("FINANCIAL_BANK_SECURITY_RESPONSE_VALIDATOR_KEY", dto);
         }
     }
 

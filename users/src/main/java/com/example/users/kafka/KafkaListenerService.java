@@ -23,4 +23,9 @@ public class KafkaListenerService {
         System.out.println("Received validator from kafka: " + validatorDto.id());
         validatorResponseHandler.setValidatorDto(validatorDto);
     }
+    @KafkaListener(topics = "FINANCIAL_BANK_SECURITY_RESPONSE_VALIDATOR_KEY", groupId = "user-validator-group-id", containerFactory = "userValidatorDtoKafkaListenerContainerFactory")
+    public void listen3(UserValidatorDto validatorDto) {
+        System.out.println("Received validator from kafka: " + validatorDto.id());
+        validatorResponseHandler.setValidatorDto(validatorDto);
+    }
 }

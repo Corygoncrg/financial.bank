@@ -5,6 +5,7 @@ import com.example.shared.service.JsonStringWrapper;
 import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.model.DeactivateUserResult;
+import com.example.users.model.RegisterUserResult;
 import com.example.users.model.UpdateUserResult;
 import com.example.users.model.VerifyUserResult;
 import com.example.users.service.UserService;
@@ -35,13 +36,13 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<String> register(@ModelAttribute @Valid UserRegisterDto dto) {
-        boolean isNotRegistered = service.register(dto);
+        RegisterUserResult result = service.register(dto);
 
-        if (isNotRegistered) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("User with this username or email already exists!");
-        }
+        return switch (result) {
+            case SUCCESS -> ResponseEntity.ok().build();
+            case USER_ALREADY_EXISTS -> ResponseEntity.status(HttpStatus.CONFLICT).body("User with this username or email already exists!");
+            case USER_NOT_VERIFIED -> ResponseEntity.ok("Unverified has been user found:  new key has been sent for the user");
+        };
     }
 
 
