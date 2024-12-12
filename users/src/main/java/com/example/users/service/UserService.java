@@ -70,19 +70,26 @@ public class UserService {
 
             var user = findUser.apply(value);
             if (user.getStatus() == UserStatus.PENDING) {
-                sendNewVerificationKey(user);
+                checkVerificationKey(user);
             }
             return true;
         }
         return false;
     }
 
-    private void sendNewVerificationKey(User user) {
+    private void checkVerificationKey(User user) {
         var optionalValidator = kafkaUserValidatorService.findByUserId(user.getId());
         if (optionalValidator == null) {
             UserValidator validator = new UserValidator(user);
-            emailService.sendVerificationKey(user, validator);
             kafkaUserValidatorService.saveValidator(validator);
+            emailService.sendVerificationKey(user, validator);
+
+        }
+        else {
+            if (optionalValidator.getExpirationDate().compareTo(Instant.now()) < 0) {
+                var validator = kafkaUserValidatorService.rebuildValidator(optionalValidator);
+                emailService.sendVerificationKey(user, validator);
+            }
         }
     }
 

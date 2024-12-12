@@ -32,7 +32,8 @@ public class EmailService {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(user.getEmail());
         msg.setSubject("New verification key");
-        msg.setText("Dear " + user.getName() + ", Your new validation key is: " + validator.getUuid());
+        msg.setText("Dear " + user.getName() + ", Your new validation key is: " + validator.getUuid() +
+                "\n email verification link: http://localhost/8081/users/verify/" + validator.getUuid());
         try {
             mailSender.send(msg);
         }

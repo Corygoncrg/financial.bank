@@ -40,6 +40,12 @@ public class UserValidator {
         this.expirationDate = dto.expirationDate();
     }
 
+    public void rebuild() {
+        this.id = id+1;
+        this.uuid = UUID.randomUUID().toString();
+        this.expirationDate = Instant.now().plusMillis(900000);
+    }
+
     public UUID getUuid() {
         return UUID.fromString(this.uuid);
     }

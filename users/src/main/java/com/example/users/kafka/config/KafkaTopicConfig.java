@@ -1,59 +1,42 @@
 package com.example.users.kafka.config;
 
+import com.example.shared.kafka.TopicBuilderWrapper;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.config.TopicBuilder;
 
 @Configuration
 public class KafkaTopicConfig {
 
+    private final TopicBuilderWrapper topicBuilderWrapper = new TopicBuilderWrapper(3, 1);
+
     @Bean
     public NewTopic usersRequestTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_USERS_REQUEST")
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_REQUEST");
     }
 
     @Bean
     public NewTopic usersRequestDtoTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_USERS_REQUEST_DTO")
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_REQUEST_DTO");
     }
-
 
     @Bean
     public NewTopic usersRequestAuthTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_USERS_REQUEST_AUTH")
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_REQUEST_AUTH");
     }
 
     @Bean
     public NewTopic usersResponseTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_USERS_RESPONSE")
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_RESPONSE");
     }
 
     @Bean
     public NewTopic usersResponseDtoTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_USERS_RESPONSE_DTO")
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_RESPONSE_DTO");
     }
 
     @Bean
     public NewTopic usersResponseAuthTopic() {
-        return TopicBuilder.name("FINANCIAL_BANK_USERS_RESPONSE_AUTH")
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_RESPONSE_AUTH");
     }
 }

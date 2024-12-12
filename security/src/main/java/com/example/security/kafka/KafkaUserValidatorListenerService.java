@@ -49,4 +49,13 @@ public class KafkaUserValidatorListenerService {
         var validator = new UserValidator(dto);
         validatorRepository.delete(validator);
     }
+    @KafkaListener(topics = "FINANCIAL_BANK_SECURITY_REQUEST_REBUILD_VALIDATOR", groupId = "security-validator-group-id", containerFactory = "userValidatorDtoKafkaListenerContainerFactory")
+    public void rebuildValidator(UserValidatorDto dto) {
+        validatorRepository.delete(new UserValidator(dto));
+        var validator = new UserValidator(dto);
+        validator.rebuild();
+        validatorRepository.save(validator);
+        var validatorDto = new UserValidatorDto(validator);
+        kafkaTemplate.send("FINANCIAL_BANK_SECURITY_RESPONSE_REBUILD_VALIDATOR", validatorDto);
+    }
 }

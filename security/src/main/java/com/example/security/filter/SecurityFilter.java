@@ -1,7 +1,6 @@
 package com.example.security.filter;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.example.security.kafka.consumer.KafkaConsumer;
 import com.example.security.service.KafkaAuthenticationService;
 import com.example.security.service.TokenService;
 import jakarta.servlet.FilterChain;
