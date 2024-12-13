@@ -1,7 +1,7 @@
 package com.example.shared.kafka;
 
-import org.springframework.kafka.config.TopicBuilder;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.kafka.config.TopicBuilder;
 
 public class TopicBuilderWrapper {
 

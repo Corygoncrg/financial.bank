@@ -18,9 +18,9 @@ public class KafkaConsumer {
     @Autowired
     private UserRepository repository;
 
-    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST", groupId = "user-group-id", containerFactory = "userDtoKafkaListenerContainerFactory")
-    public void receiveToken(String userId) {
-        var user = repository.findByName(userId);
+    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST", groupId = "users-string-wrapper-group-id", containerFactory = "jsonStringWrapperKafkaListenerContainerFactory")
+    public void receiveToken(JsonStringWrapper userId) {
+        var user = repository.findByName(userId.getValue());
 
         var userDto = new UserDto(user);
         kafkaTemplate.send("FINANCIAL_BANK_USERS_RESPONSE", userDto);
