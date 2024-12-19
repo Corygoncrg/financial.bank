@@ -13,9 +13,6 @@ public class KafkaListenerService {
     @Autowired
     private KafkaDtoResponseHandler dtoHandler;
 
-    @Autowired
-    private KafkaAuthenticationResponseHandler authenticationResponseHandler;
-
 
     @KafkaListener(topics = "FINANCIAL_BANK_USERS_RESPONSE", groupId = "security-group-id", containerFactory = "userDtoKafkaListenerContainerFactory")
     public void listen0(UserDto userDto) {
@@ -29,9 +26,4 @@ public class KafkaListenerService {
         dtoHandler.setUserDto(userDto);
     }
 
-    @KafkaListener(topics = "FINANCIAL_BANK_USERS_RESPONSE_AUTH", groupId = "security-auth-group-id", containerFactory = "authDtoKafkaListenerContainerFactory")
-    public void listen2(UserAuthenticationDto userAuthenticationDto) {
-        System.out.println("Received User from Kafka: " + userAuthenticationDto);
-        authenticationResponseHandler.setAuthDto(userAuthenticationDto);
-    }
 }

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class KafkaTopicConfig {
 
-    private final TopicBuilderWrapper topicBuilderWrapper = new TopicBuilderWrapper(3, 1);
+    private final TopicBuilderWrapper topicBuilderWrapper = new TopicBuilderWrapper(2, 1);
 
     @Bean
     public NewTopic usersRequestTopic() {
@@ -21,11 +21,6 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public NewTopic usersRequestAuthTopic() {
-        return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_REQUEST_AUTH");
-    }
-
-    @Bean
     public NewTopic usersResponseTopic() {
         return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_RESPONSE");
     }
@@ -33,10 +28,5 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic usersResponseDtoTopic() {
         return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_RESPONSE_DTO");
-    }
-
-    @Bean
-    public NewTopic usersResponseAuthTopic() {
-        return topicBuilderWrapper.build("FINANCIAL_BANK_USERS_RESPONSE_AUTH");
     }
 }

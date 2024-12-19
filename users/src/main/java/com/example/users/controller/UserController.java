@@ -70,8 +70,6 @@ public class UserController {
 
     @GetMapping("verify/{uuid}")
     public ResponseEntity<String> verifyUser(@PathVariable String uuid) {
-        //TODO: When the user receives the email, there's a link that he can click to go on the site, and insert
-        // the validation key to validate his account
         VerifyUserResult result = service.verifyUser(uuid);
 
         return switch (result){

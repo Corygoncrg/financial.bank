@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class KafkaConsumer {
+public class KafkaSecurityConsumer {
 
     @Autowired
     @Qualifier("securityKafkaTemplate")
@@ -21,10 +21,6 @@ public class KafkaConsumer {
 
     @Autowired
     private KafkaDtoResponseHandler responseHandler;
-
-//    @Autowired
-//    private KafkaAuthenticationResponseHandler authenticationHandler;
-
 
     @Autowired
     private TokenService tokenService;
@@ -47,24 +43,6 @@ public class KafkaConsumer {
             throw new RuntimeException("Interrupted while waiting for Kafka response", e);
         }
     }
-
-
-//    public UserAuthenticationDto getUserAuthentication(String token) {
-//        String userId = tokenService.getSubject(token);
-//        try {
-//            kafkaTemplate.send("FINANCIAL_BANK_USERS_REQUEST_AUTH", userId);
-//
-//            if (!authenticationHandler.awaitResponseWithTimeout(10, TimeUnit.SECONDS)) {
-//                throw new RuntimeException("Timeout waiting for user details from Kafka");
-//            }
-//
-//            return authenticationHandler.getAuthenticationDto();
-//
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt();
-//            throw new RuntimeException("Interrupted while waiting for Kafka response", e);
-//        }
-//    }
 
     public UserDto requestUserByName(String name) {
         try {

@@ -1,6 +1,5 @@
 package com.example.users.kafka;
 
-import com.example.shared.dto.UserAuthenticationDto;
 import com.example.shared.dto.UserDto;
 import com.example.shared.service.JsonStringWrapper;
 import com.example.users.repository.UserRepository;
@@ -33,15 +32,6 @@ public class KafkaConsumer {
 
         var userDto = new UserDto(user);
         kafkaTemplate.send("FINANCIAL_BANK_USERS_RESPONSE_DTO", userDto);
-    }
-
-    @KafkaListener(topics = "FINANCIAL_BANK_USERS_REQUEST_AUTH", groupId = "auth-group-id", containerFactory = "jsonStringWrapperKafkaListenerContainerFactory")
-    public void getUserAuthentication(JsonStringWrapper message) {
-        var user = repository.findByName(message.getValue());
-        if (user == null) return;
-
-        var authDto = new UserAuthenticationDto(user);
-        kafkaTemplate.send("FINANCIAL_BANK_USERS_RESPONSE_AUTH", authDto);
     }
 
 }
