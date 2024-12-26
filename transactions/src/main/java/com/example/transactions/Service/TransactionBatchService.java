@@ -42,7 +42,13 @@ public class TransactionBatchService {
         }
         return null;
     }
-    
+
+    public void resetState() {
+        firstTransactionDate = null;
+        System.out.println("Transaction state reset.");
+    }
+
+
     private boolean isSameDay(LocalDateTime date1, LocalDateTime date2) {
         return date1.getDayOfMonth() == date2.getDayOfMonth()
                 && date1.getMonth() == date2.getMonth()

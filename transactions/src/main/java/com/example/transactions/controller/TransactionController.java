@@ -43,7 +43,7 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @GetMapping("/files/{filename:.+}")
+    @GetMapping("files/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
         var file = transactionService.getResourceResponseEntity(filename, storageService);
@@ -54,37 +54,37 @@ public class TransactionController {
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
-    @GetMapping("/transactions")
+    @GetMapping("transactions")
     @ResponseBody
     public List<TransactionDto> getTransactions() throws IOException {
         return transactionService.getTransactionsFromFiles(storageService);
     }
 
-    @GetMapping("/transactions/details/{importDate}")
+    @GetMapping("transactions/details/{importDate}")
     @ResponseBody
     public List<TransactionDto> detailTransaction(@PathVariable String importDate) {
         return transactionService.getTransactionsByImportDate(importDate);
     }
 
-    @GetMapping("/transactions/analyses/{year}/{month}")
+    @GetMapping("transactions/analyses/{year}/{month}")
     @ResponseBody
     public List<TransactionDto> listSuspectTransactions(@PathVariable int year, @PathVariable int month) {
         return transactionService.getSuspectTransactionsByYearAndMonth(year, month);
     }
 
-    @GetMapping("/accounts/analyses/{year}/{month}")
+    @GetMapping("transactions/accounts/analyses/{year}/{month}")
     @ResponseBody
     public List<AccountDto> listSuspectAccounts(@PathVariable int year, @PathVariable int month) {
         return transactionService.getSuspectAccountsByYearAndMonth(year, month);
     }
 
-    @GetMapping("/agencies/analyses/{year}/{month}")
+    @GetMapping("transactions/agencies/analyses/{year}/{month}")
     @ResponseBody
     public List<AgencyDto> listSuspectAgencies(@PathVariable int year, @PathVariable int month) {
        return transactionService.getSuspectAgenciesByYearAndMonth(year, month);
     }
 
-    @PostMapping("/")
+    @PostMapping("transactions")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
 

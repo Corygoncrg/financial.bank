@@ -15,6 +15,15 @@
           <option value="users" />
           <option value="users" />
           <option value="users" />
+          <option value="gateway" />
+          <option value="gateway" />
+          <option value="gateway" />
+          <option value="gateway" />
+          <option value="gateway" />
+          <option value="gateway" />
+          <option value="gateway" />
+          <option value="gateway" />
+          <option value="gateway" />
         </list>
       </option>
       <option name="ignoredPackages">
@@ -27,10 +36,28 @@
           <option value="org.xmlunit:xmlunit-core:2.9.1" />
           <option value="commons-io:commons-io:2.11.0" />
           <option value="io.netty:netty-common:4.1.113.Final" />
+          <option value="com.thoughtworks.xstream:xstream:1.4.20" />
+          <option value="org.springframework:spring-expression:6.1.13" />
+          <option value="org.apache.httpcomponents:httpclient:4.5.3" />
+          <option value="org.springframework:spring-context:6.1.13" />
+          <option value="org.springframework:spring-beans:6.1.13" />
+          <option value="org.springframework:spring-core:6.1.13" />
+          <option value="io.netty:netty-common:4.1.113.Final" />
+          <option value="org.xmlunit:xmlunit-core:2.9.1" />
+          <option value="org.codehaus.plexus:plexus-utils:3.0.18" />
         </list>
       </option>
       <option name="ignoredReasons">
         <list>
+          <option value="Not exploitable" />
+          <option value="Not exploitable" />
+          <option value="Not exploitable" />
+          <option value="Not exploitable" />
+          <option value="Not exploitable" />
+          <option value="Not exploitable" />
+          <option value="Not exploitable" />
+          <option value="Not exploitable" />
+          <option value="Not exploitable" />
           <option value="Not exploitable" />
           <option value="Not exploitable" />
           <option value="Not exploitable" />
