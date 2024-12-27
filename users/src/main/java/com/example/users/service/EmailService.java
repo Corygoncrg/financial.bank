@@ -19,7 +19,7 @@ public class EmailService {
         msg.setTo(user.getEmail());
         msg.setSubject("Email verification");
         msg.setText("Dear " + user.getName() + ", your password has been set to: " + user.getPassword() +
-                "\nYour validation key is: " + validator.getUuid());
+                "\nYour link to validate your account is: http://localhost/8083/users/verify/" + validator.getUuid());
         try {
             mailSender.send(msg);
         }
@@ -33,7 +33,7 @@ public class EmailService {
         msg.setTo(user.getEmail());
         msg.setSubject("New verification key");
         msg.setText("Dear " + user.getName() + ", Your new validation key is: " + validator.getUuid() +
-                "\n email verification link: http://localhost/8081/users/verify/" + validator.getUuid());
+                "\n email verification link: http://localhost/8083/users/verify/" + validator.getUuid());
         try {
             mailSender.send(msg);
         }
