@@ -8,6 +8,8 @@ import com.example.transactions.dto.TransactionDto;
 import com.example.transactions.exception.StorageFileNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +25,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.util.List;
 
+import static com.example.shared.util.HeaderConstants.CORRELATION_ID;
+
 @Controller
 public class TransactionController {
 
+    private static final Logger logger = LoggerFactory.getLogger(TransactionController.class);
     private final StorageService storageService;
     private final JobLauncher jobLauncher;
     private final Job importTransactionJobCsv;
     private final Job importTransactionJobXml;
+    public static final String IMPORT_URL = "http://127.0.0.1:5500/html/import.html";
 
     @Autowired
     public TransactionController(StorageService storageService, JobLauncher jobLauncher, @Qualifier("importTransactionJobCsv") Job importTransactionJobCsv,
@@ -45,7 +51,7 @@ public class TransactionController {
 
     @GetMapping("files/{filename:.+}")
     @ResponseBody
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+    public ResponseEntity<Resource> serveFile( @PathVariable String filename) {
         var file = transactionService.getResourceResponseEntity(filename, storageService);
         if (file == null) {
             return ResponseEntity.notFound().build();
@@ -56,36 +62,46 @@ public class TransactionController {
 
     @GetMapping("transactions")
     @ResponseBody
-    public List<TransactionDto> getTransactions() throws IOException {
+    public List<TransactionDto> getTransactions(@RequestHeader(CORRELATION_ID) String correlationId) throws IOException {
+        logger.debug("Correlation ID found for getting transactions: {} ", correlationId);
+
         return transactionService.getTransactionsFromFiles(storageService);
     }
 
     @GetMapping("transactions/details/{importDate}")
     @ResponseBody
-    public List<TransactionDto> detailTransaction(@PathVariable String importDate) {
+    public List<TransactionDto> detailTransaction(@RequestHeader(CORRELATION_ID) String correlationId, @PathVariable String importDate) {
+        logger.debug("Correlation ID found for details: {} ", correlationId);
+
         return transactionService.getTransactionsByImportDate(importDate);
     }
 
     @GetMapping("transactions/analyses/{year}/{month}")
     @ResponseBody
-    public List<TransactionDto> listSuspectTransactions(@PathVariable int year, @PathVariable int month) {
+    public List<TransactionDto> listSuspectTransactions(@RequestHeader(CORRELATION_ID) String correlationId, @PathVariable int year, @PathVariable int month) {
+        logger.debug("Correlation ID found for listing suspect transactions: {} ", correlationId);
+
         return transactionService.getSuspectTransactionsByYearAndMonth(year, month);
     }
 
     @GetMapping("transactions/accounts/analyses/{year}/{month}")
     @ResponseBody
-    public List<AccountDto> listSuspectAccounts(@PathVariable int year, @PathVariable int month) {
+    public List<AccountDto> listSuspectAccounts(@RequestHeader(CORRELATION_ID) String correlationId, @PathVariable int year, @PathVariable int month) {
+        logger.debug("Correlation ID found for listing suspect accounts: {} ", correlationId);
         return transactionService.getSuspectAccountsByYearAndMonth(year, month);
     }
 
     @GetMapping("transactions/agencies/analyses/{year}/{month}")
     @ResponseBody
-    public List<AgencyDto> listSuspectAgencies(@PathVariable int year, @PathVariable int month) {
-       return transactionService.getSuspectAgenciesByYearAndMonth(year, month);
+    public List<AgencyDto> listSuspectAgencies(@RequestHeader(CORRELATION_ID) String correlationId, @PathVariable int year, @PathVariable int month) {
+        logger.debug("Correlation ID found for listing suspect agencies: {} ", correlationId);
+        return transactionService.getSuspectAgenciesByYearAndMonth(year, month);
     }
 
     @PostMapping("transactions")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
+    public String handleFileUpload(@RequestHeader(CORRELATION_ID) String correlationId, @RequestParam("file") MultipartFile file, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
+        logger.debug("Correlation ID for uploading file: {} ", correlationId);
+
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
 
         if ("csv".equalsIgnoreCase(fileExtension)) {
@@ -94,9 +110,9 @@ public class TransactionController {
             transactionService.xmlFileUpload(file, token, redirectAttributes, jobLauncher, importTransactionJobXml, storageService);
         } else {
             redirectAttributes.addFlashAttribute("message", "Unsupported file type: " + fileExtension);
-            return "redirect:http://127.0.0.1:5500/html/import.html";
+            return IMPORT_URL;
         }
-        return "redirect:http://127.0.0.1:5500/html/import.html";
+        return IMPORT_URL;
     }
 
     @ExceptionHandler(StorageFileNotFoundException.class)

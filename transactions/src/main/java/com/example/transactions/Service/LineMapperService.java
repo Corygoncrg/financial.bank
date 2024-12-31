@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-import static com.example.transactions.Service.SqlService.listFields;
+import static com.example.transactions.util.SqlFields.listFields;
 
 @Service
 public class LineMapperService {

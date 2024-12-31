@@ -16,6 +16,7 @@ public class KafkaProducerConfig {
 
     private final String bootstrapServers;
 
+    @SuppressWarnings("unused")
     public KafkaProducerConfig() {
         bootstrapServers = "";
     }

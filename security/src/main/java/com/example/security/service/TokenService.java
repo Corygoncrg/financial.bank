@@ -6,11 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.example.shared.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -27,8 +23,8 @@ public class TokenService {
 
 
     /**
-     * Method to create a token when a user is in sent
-     * @param user User object to get user from
+     * Method to create a token when a user is received
+     * @param user User object
      * @return String
      */
     public String createToken(User user) {
@@ -45,7 +41,7 @@ public class TokenService {
     }
 
     /**
-     * Method to verify tokenJWT
+     * Method to verify if token is still valid
      * @param tokenJWT String which contains a tokenJWT
      * @return String
      */

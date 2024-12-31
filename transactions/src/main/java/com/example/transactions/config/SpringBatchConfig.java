@@ -31,7 +31,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
 
-import static com.example.transactions.Service.SqlService.*;
+import static com.example.transactions.util.SqlFields.*;
 import static com.example.transactions.config.StorageProperties.uploadDirLocation;
 
 @Configuration

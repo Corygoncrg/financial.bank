@@ -1,6 +1,5 @@
 package com.example.security.kafka;
 
-import com.example.shared.dto.UserAuthenticationDto;
 import com.example.shared.dto.UserDto;
 import com.example.shared.kafka.responseHandler.KafkaDtoResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -47,8 +47,6 @@ public class TransactionService {
     @Qualifier("transactionsKafkaTemplate")
     private KafkaTemplate<String, Object> kafkaTemplate;
 
-    private final String topic = "FINANCIAL_BANK_TRANSACTIONS_REQUEST";
-
     private final LocalDateTimeEditor localDateTimeEditor;
 
     @Autowired
@@ -124,6 +122,7 @@ public class TransactionService {
     private void sendStringAsJson(String token) {
         var jsonMessage = new JsonStringWrapper();
         jsonMessage.setValue(token);
+        String topic = "FINANCIAL_BANK_TRANSACTIONS_REQUEST";
         kafkaTemplate.send(topic, jsonMessage);
     }
 

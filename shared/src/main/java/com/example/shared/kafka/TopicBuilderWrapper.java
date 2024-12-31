@@ -19,6 +19,8 @@ public class TopicBuilderWrapper {
                 .replicas(replicas)
                 .build();
     }
+
+    @SuppressWarnings("unused")
     public NewTopic buildControl(String topic, int partitions, int replicas) {
         return TopicBuilder.name(topic)
                 .partitions(partitions)

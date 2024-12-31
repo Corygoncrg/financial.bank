@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import static com.example.transactions.Service.SqlService.allFields;
+import static com.example.transactions.util.SqlFields.allFields;
 
 @Component
 public class JobCompletionNotificationListener implements JobExecutionListener {
