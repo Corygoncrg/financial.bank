@@ -1,6 +1,7 @@
 package com.example.users.service;
 
 import com.example.shared.dto.UserDto;
+import com.example.shared.exception.NoUuidFoundException;
 import com.example.shared.model.User;
 import com.example.shared.model.UserStatus;
 import com.example.shared.model.UserValidator;
@@ -9,6 +10,7 @@ import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.factory.UserFactory;
 import com.example.users.kafka.KafkaUserValidatorService;
 import com.example.users.model.DeactivateUserResult;
+import com.example.users.model.RegisterUserResult;
 import com.example.users.model.UpdateUserResult;
 import com.example.users.model.VerifyUserResult;
 import com.example.users.repository.UserRepository;
@@ -18,14 +20,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +36,7 @@ class UserServiceTest {
     EmailService emailService;
 
     @Mock
-    KafkaUserValidatorService validatorRepository;
+    KafkaUserValidatorService kafkaUserValidatorService;
 
     @Mock
     UserFactory factory;
@@ -48,31 +47,44 @@ class UserServiceTest {
     @Test
     @DisplayName("Test if username already exists")
     void registerUsernameAlreadyExists() {
-        var dto = mock(UserRegisterDto.class);
+        var dto = new UserRegisterDto("test", "test@email.com");
+        var user = new User();
         when(repository.existsByName(dto.username())).thenReturn(true);
+        when(repository.findByName(dto.username())).thenReturn(user);
 
         var result = service.register(dto);
 
-        assertFalse(result);
+        assertEquals(RegisterUserResult.USER_ALREADY_EXISTS, result);
+        verify(repository, never()).save(any());
+        verify(emailService, never()).sendPasswordEmail(any(), any());
+        verify(kafkaUserValidatorService, never()).saveValidator(any());
     }
 
     @Test
     @DisplayName("Test if email already exists")
     void registerEmailAlreadyExists() {
-        var dto = mock(UserRegisterDto.class);
+        var dto = new UserRegisterDto("test", "test@email.com");
+        var user = new User();
         when(repository.existsByEmail(dto.email())).thenReturn(true);
+        when(repository.findByEmail(dto.email())).thenReturn(user);
 
         var result = service.register(dto);
 
-        assertFalse(result);
+        assertEquals(RegisterUserResult.USER_ALREADY_EXISTS, result);
+        verify(repository, never()).save(any());
+        verify(emailService, never()).sendPasswordEmail(any(), any());
+        verify(kafkaUserValidatorService, never()).saveValidator(any());
     }
 
-    @SuppressWarnings("unused")
     @Test
     @DisplayName("Test emailService is called")
     void registerPasswordSent() {
         var dto = mock(UserRegisterDto.class);
+        var user = new User();
+        user.setPassword("password");
+        when(repository.existsByName(dto.username())).thenReturn(false);
         when(repository.existsByEmail(dto.email())).thenReturn(false);
+        when(factory.createUser(dto)).thenReturn(user);
 
         service.register(dto);
 
@@ -83,14 +95,18 @@ class UserServiceTest {
     @DisplayName("Test repository is called")
     void registerUserInRepository() {
         var dto = mock(UserRegisterDto.class);
+        var user = new User();
+        user.setPassword("password");
+        when(repository.existsByName(dto.username())).thenReturn(false);
         when(repository.existsByEmail(dto.email())).thenReturn(false);
+        when(factory.createUser(dto)).thenReturn(user);
 
         var result = service.register(dto);
 
-        assertTrue(result);
+        assertEquals(RegisterUserResult.SUCCESS, result);
 
         verify(repository).save(any(User.class));
-        verify(validatorRepository).save((any(UserValidator.class)));
+        verify(kafkaUserValidatorService).saveValidator((any(UserValidator.class)));
     }
 
     @Test
@@ -107,7 +123,9 @@ class UserServiceTest {
     void updateEmailConflict() {
 
         var dto = new UserUpdateDto(2L, "Ben", "email@example.com", UserStatus.ACTIVE);
+        var user = new User();
         when(repository.existsByEmail(dto.email())).thenReturn(true);
+        when(repository.findByEmail(dto.email())).thenReturn(user);
 
         var result = service.updateUser(dto);
 
@@ -168,6 +186,7 @@ class UserServiceTest {
     @DisplayName("Test user not verified")
     void verifyUserNotVerified() {
         var uuid = UUID.randomUUID().toString();
+        when(kafkaUserValidatorService.findByUuid(uuid)).thenThrow(NoUuidFoundException.class);
 
         var result = service.verifyUser(uuid);
 
@@ -180,13 +199,12 @@ class UserServiceTest {
         var uuid = UUID.randomUUID().toString();
         var validator = new UserValidator();
         validator.setExpirationDate(Instant.now());
-        Optional<UserValidator> optionalValidator = Optional.of(validator);
 
-        when(validatorRepository.findByUuid(uuid)).thenReturn(optionalValidator);
+        when(kafkaUserValidatorService.findByUuid(uuid)).thenReturn(validator);
 
         var result = service.verifyUser(uuid);
 
-        verify(validatorRepository).delete(validator);
+        verify(kafkaUserValidatorService).deleteValidator(validator);
 
         assertEquals(VerifyUserResult.EXPIRED_VALIDATION_DATE, result);
     }
@@ -197,12 +215,11 @@ class UserServiceTest {
         var uuid = UUID.randomUUID().toString();
         var user = mock(User.class);
         var mockValidator = mock(UserValidator.class);
-        Optional<UserValidator> optionalValidator = Optional.of(mockValidator);
 
         when(mockValidator.getExpirationDate()).thenReturn(Instant.now().plusSeconds(300));
         when(mockValidator.getIdUser()).thenReturn(user);
 
-        when(validatorRepository.findByUuid(uuid)).thenReturn(optionalValidator);
+        when(kafkaUserValidatorService.findByUuid(uuid)).thenReturn(mockValidator);
 
         var result = service.verifyUser(uuid);
 
@@ -225,7 +242,6 @@ class UserServiceTest {
     @Test
     @DisplayName("Test user is returned")
     void checkCurrentUser() {
-        var details = mock(UserDetails.class);
         var username = "Jin";
         var user = mock(User.class);
         var dto = new UserDto(user);

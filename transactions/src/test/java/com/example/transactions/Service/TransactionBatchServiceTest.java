@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -22,15 +23,11 @@ class TransactionBatchServiceTest {
     @Mock
     TransactionRepository repository;
 
-    @InjectMocks
-    TransactionBatchService service;
-
     @Mock
     private TransactionRecord record;
 
-    @Mock
-    private UserDto userDto;
-
+    @InjectMocks
+    TransactionBatchService service;
 
     @BeforeEach
     void setup() {
@@ -45,7 +42,7 @@ class TransactionBatchServiceTest {
         when(repository.existsByTransactionDate(transactionDate)).thenReturn(true);
 
 
-       var result = service.processRecord(record, LocalDateTime.now(), userDto);
+       var result = service.processRecord(record, LocalDateTime.now(), getUserDto());
 
 
         assertNull(result);
@@ -55,12 +52,13 @@ class TransactionBatchServiceTest {
     @DisplayName("Test non-duplicate returns not null")
     void processRecord2() {
         var transactionDate = LocalDateTime.of(2022, 7, 1, 12, 0);
+
         when(record.getTransactionDate()).thenReturn(transactionDate);
         when(repository.existsByTransactionDate(transactionDate)).thenReturn(false);
         when(record.getOriginal()).thenReturn(originalDetails());
         when(record.getDestiny()).thenReturn(destinyDetails());
 
-       var result = service.processRecord(record, LocalDateTime.now(), userDto);
+       var result = service.processRecord(record, LocalDateTime.now(), getUserDto());
 
         assertNotNull(result);
     }
@@ -71,7 +69,7 @@ class TransactionBatchServiceTest {
         LocalDateTime newTransactionDate = LocalDateTime.of(2024, 6, 29, 12, 0);
 
 
-        var user = new User(userDto);
+        var user = new User(getUserDto());
         var importDate = LocalDateTime.now();
         var transactionDate = LocalDateTime.of(2022, 7, 1, 12, 0);
         var expected = transactionConstructor(transactionDate, importDate, user);
@@ -82,14 +80,14 @@ class TransactionBatchServiceTest {
         when(record.getDestiny()).thenReturn(destinyDetails());
         when(record.getIdUser()).thenReturn(user);
 
-        var result = service.processRecord(record, importDate, userDto);
+        var result = service.processRecord(record, importDate, getUserDto());
 
         assertEquals(expected,result);
         assertEquals(expected.getUserId(), result.getUserId());
 
         when(record.getTransactionDate()).thenReturn(newTransactionDate);
         when(repository.existsByTransactionDate(newTransactionDate)).thenReturn(true); // Simulate duplicate
-        var secondResult= service.processRecord(record, importDate, userDto);
+        var secondResult= service.processRecord(record, importDate, getUserDto());
 
         assertNull(secondResult, "Skipping transaction with date: " + newTransactionDate);
 
@@ -98,7 +96,7 @@ class TransactionBatchServiceTest {
     @Test
     @DisplayName("Test idUser is set correctly")
     void testIdUserIsSet() {
-        var user = new User(userDto);
+        var user = new User(getUserDto());
         var importDate = LocalDateTime.now();
         var transactionDate = LocalDateTime.of(2022, 7, 1, 12, 0);
         var expected = transactionConstructor(transactionDate, importDate, user);
@@ -109,7 +107,7 @@ class TransactionBatchServiceTest {
         when(record.getDestiny()).thenReturn(destinyDetails());
         when(record.getIdUser()).thenReturn(user);
 
-        var result = service.processRecord(record, importDate, userDto);
+        var result = service.processRecord(record, importDate, getUserDto());
 
         assertEquals(expected,result);
         assertEquals(expected.getUserId(), result.getUserId());
@@ -142,6 +140,11 @@ class TransactionBatchServiceTest {
          bank.setAccount("account-2");
          bank.setAgency("agency-2");
         return bank;
+    }
+
+    private UserDto getUserDto() {
+        List<String> list = List.of("element1", "element2");
+        return new UserDto(1L, "Name", "example@email.com", "password", "ACTIVE", list);
     }
 
 }
