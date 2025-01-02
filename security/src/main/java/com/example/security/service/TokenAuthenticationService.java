@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TokenAuthenticationService {
+
     private static final Logger logger = LoggerFactory.getLogger(TokenAuthenticationService.class);
 
     @Autowired
@@ -19,7 +20,7 @@ public class TokenAuthenticationService {
 
     public UsernamePasswordAuthenticationToken authenticateToken(String token) {
         try {
-            var subject = tokenService.getSubject(token); // Existing method in TokenService
+            var subject = tokenService.getSubject(token);
             logger.debug("Token subject: {}", subject);
 
             var user = kafkaAuthService.getUserAuthentication(subject);
