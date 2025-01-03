@@ -16,10 +16,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LoginServiceTest {
+
+    @Mock
+    private TokenService tokenService;
 
     @Mock
     private KafkaSecurityConsumer kafkaSecurityConsumer;
@@ -46,6 +50,7 @@ class LoginServiceTest {
     void testUserActive() {
         var dto = new AuthenticationDTO("user", "password");
         when(kafkaSecurityConsumer.requestUserByName(dto.user())).thenReturn(getUserDto());
+        when(tokenService.createToken(any())).thenReturn("token");
 
         assertDoesNotThrow(() -> loginService.login(dto));
     }
