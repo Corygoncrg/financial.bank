@@ -6,13 +6,11 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.3.4</version>
-    <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>com.example</groupId>
   <artifactId>commonDatabase</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>commonDatabase</name>
-  <url>http://maven.apache.org</url>
   <properties>
     <java.version>17</java.version>
     <spring-cloud.version>2023.0.4</spring-cloud.version>
