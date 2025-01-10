@@ -21,5 +21,6 @@ COPY gateway/pom.xml /app/pom.xml
 COPY gateway/src /app/src
 
 COPY --from=builder /root/.m2 /root/.m2
+ENV SPRING_PROFILES_ACTIVE=prod
 
 CMD ["./mvnw", "-Dmaven.repo.local=/root/.m2/repository", "spring-boot:run"]
