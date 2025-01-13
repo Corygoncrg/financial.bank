@@ -1,5 +1,6 @@
 package com.example.gateway.filter;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.annotation.Order;
@@ -21,6 +22,9 @@ public class AuthenticationFilter implements GlobalFilter {
 
     private final WebClient.Builder webClientBuilder;
     private static final List<String> EXCLUDED_PATHS = List.of("/login", "/validate"); // Exclude these paths
+
+    @Value("${http.host}")
+    private String localhost;
 
     public AuthenticationFilter(WebClient.Builder webClientBuilder) {
         this.webClientBuilder = webClientBuilder;
@@ -50,7 +54,7 @@ public class AuthenticationFilter implements GlobalFilter {
         // Validate token with the security service
         return webClientBuilder.build()
                 .post()
-                .uri("http://localhost:8082/validate")
+                .uri("http://" + localhost + ":8082/validate")
                 .bodyValue(token)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, clientResponse -> {
