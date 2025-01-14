@@ -21,7 +21,7 @@ import java.util.List;
 public class AuthenticationFilter implements GlobalFilter {
 
     private final WebClient.Builder webClientBuilder;
-    private static final List<String> EXCLUDED_PATHS = List.of("/login", "/validate"); // Exclude these paths
+    private static final List<String> EXCLUDED_PATHS = List.of("/login", "/validate", "/actuator/health"); // Exclude these paths
 
     @Value("${http.host}")
     private String localhost;

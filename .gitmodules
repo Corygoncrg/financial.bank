@@ -1,0 +1,3 @@
+[submodule "financial.bank.frontend"]
+	path = financial.bank.frontend
+	url = git@github.com:Corygoncrg/financial.bank.frontend.git
