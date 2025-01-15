@@ -16,7 +16,7 @@ public class RewriteUsersPathFilter implements GlobalFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().toString();
 
-        if (path.startsWith("/login") || path.startsWith("/validate") || path.startsWith("/transactions")) {
+        if (path.startsWith("/login") || path.startsWith("/validate") || path.startsWith("/transactions") || path.startsWith("/actuator")) {
             return chain.filter(exchange);
         }
 

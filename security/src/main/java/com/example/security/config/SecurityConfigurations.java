@@ -30,7 +30,7 @@ public class SecurityConfigurations {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
-                    req.requestMatchers("/login", "/validate").permitAll();
+                    req.requestMatchers("/login", "/validate", "/actuator/**").permitAll();
                     req.requestMatchers("users", "users/verify/**", "users/current-user").permitAll();
                     req.anyRequest().authenticated();
                 })
