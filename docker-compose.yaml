@@ -1,0 +1,198 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.4
+    ports:
+      - "22181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka_users:
+    image: confluentinc/cp-kafka:7.4.4
+    ports:
+      - "29091:29091"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_users:9091,PLAINTEXT_HOST://localhost:29091
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "9091" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kafka_transactions:
+    image: confluentinc/cp-kafka:7.4.4
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_transactions:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "9092" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka_security:
+    image: confluentinc/cp-kafka:7.4.4
+    ports:
+      - "29093:29093"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_security:9093,PLAINTEXT_HOST://localhost:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "9093" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  eureka:
+    build: server
+    ports:
+      - "8084:8084"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8084/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  gateway:
+    build:
+      context: ../financial.bank
+      dockerfile: gateway/Dockerfile
+    ports:
+      - "8083:8083"
+    depends_on:
+      eureka:
+          condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    volumes:
+      - ~/.m2:/root/.m2
+    environment:
+      MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
+      HTTP_HOST: security
+  transactions:
+    build:
+      context: ../financial.bank
+      dockerfile: transactions/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      kafka_transactions:
+        condition: service_healthy
+      users:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 123
+      MYSQL_DATABASE: financial_bank
+      JWT_SECRET: 123456
+      MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
+    volumes:
+      - ~/.m2:/root/.m2
+  users:
+    build:
+      context: ../financial.bank
+      dockerfile: users/Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      kafka_users:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      security:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 123
+      MYSQL_DATABASE: financial_bank
+      JWT_SECRET: 123456
+      MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
+      EXAMPLE_EMAIL: email@example.com
+      EXAMPLE_PASSWORD: 123
+    volumes:
+      - ~/.m2:/root/.m2
+  security:
+    build:
+      context: ../financial.bank
+      dockerfile: security/Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      kafka_security:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 123
+      MYSQL_DATABASE: financial_bank
+      JWT_SECRET: 123456
+      MAVEN_OPTS: -Dmaven.repo.local=/root/.m2m2
+
+    volumes:
+      - ~/.m2:/root/.m2
+  db:
+    image: mysql:8.0.40
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: financial_bank
+    volumes:
+      - financial-bank-db-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  financial-bank-db-data:
