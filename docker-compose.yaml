@@ -115,6 +115,11 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
     environment:
       MYSQL_HOST: db
       MYSQL_USER: root
@@ -181,6 +186,25 @@ services:
 
     volumes:
       - ~/.m2:/root/.m2
+
+  frontend:
+    build:
+      context: ./financial.bank.frontend
+      dockerfile: Dockerfile
+    ports:
+    - "5500:5500"
+    volumes:
+    - ./financial.bank.frontend:/app
+
+    depends_on:
+      transactions:
+        condition: service_healthy
+      security:
+        condition: service_healthy
+      users:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
   db:
     image: mysql:8.0.40
     restart: always
