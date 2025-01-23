@@ -31,7 +31,7 @@ public class SecurityConfigurations {
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                     req.requestMatchers("/login", "/validate", "/actuator/**").permitAll();
-                    req.requestMatchers("users", "users/verify/**", "users/current-user").permitAll();
+                    req.requestMatchers("users", "users/signup", "users/verify/**", "users/current-user").permitAll();
                     req.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

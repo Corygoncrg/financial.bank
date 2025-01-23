@@ -40,8 +40,8 @@ public class UserController {
         return user.stream().map(UserDto::new).collect(Collectors.toList());
     }
 
-    @PostMapping
-    public ResponseEntity<String> register(@ModelAttribute @Valid UserRegisterDto dto,
+    @PostMapping("signup")
+    public ResponseEntity<String> register(@RequestBody @Valid UserRegisterDto dto,
                                            @RequestHeader(CORRELATION_ID) String correlationId) {
         logger.debug("Correlation ID for register: {} ", correlationId);
         RegisterUserResult result = service.register(dto);

@@ -140,7 +140,7 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-      security:
+      gateway:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
@@ -154,8 +154,8 @@ services:
       MYSQL_DATABASE: financial_bank
       JWT_SECRET: 123456
       MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
-      EXAMPLE_EMAIL: email@example.com
-      EXAMPLE_PASSWORD: 123
+      EXAMPLE_EMAIL: ${EXAMPLE_EMAIL}
+      EXAMPLE_PASSWORD: ${EXAMPLE_PASSWORD}
     volumes:
       - ~/.m2:/root/.m2
   security:
@@ -169,7 +169,7 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-      gateway:
+      users:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
@@ -191,10 +191,13 @@ services:
     build:
       context: ./financial.bank.frontend
       dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
     ports:
     - "5500:5500"
     volumes:
     - ./financial.bank.frontend:/app
+    - /app/dist
 
     depends_on:
       transactions:
@@ -203,8 +206,7 @@ services:
         condition: service_healthy
       users:
         condition: service_healthy
-    environment:
-      NODE_ENV: development
+
   db:
     image: mysql:8.0.40
     restart: always
@@ -217,6 +219,6 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 15
 volumes:
   financial-bank-db-data:

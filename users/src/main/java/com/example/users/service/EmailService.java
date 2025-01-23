@@ -1,5 +1,6 @@
 package com.example.users.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import com.example.shared.model.User;
 import com.example.shared.model.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,10 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    private final String VALIDATE_URL = "http://localhost/8083/users/verify/";
+    @Value("${host.name}")
+    private String hostname;
+
+    private final String VALIDATE_URL = hostname + "/users/verify/";
 
     public void sendPasswordEmail(User user, UserValidator validator) {
         SimpleMailMessage msg = new SimpleMailMessage();
