@@ -1,9 +1,9 @@
 package com.example.users.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import com.example.shared.model.User;
 import com.example.shared.model.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
