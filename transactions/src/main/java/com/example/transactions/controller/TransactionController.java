@@ -14,6 +14,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,9 @@ public class TransactionController {
     private final JobLauncher jobLauncher;
     private final Job importTransactionJobCsv;
     private final Job importTransactionJobXml;
-    public static final String IMPORT_URL = "http://127.0.0.1:5500/html/import.html";
+
+    @Value("${import.url}")
+    private String IMPORT_URL = "http://127.0.0.1:5500/html/import.html";
 
     @Autowired
     public TransactionController(StorageService storageService, JobLauncher jobLauncher, @Qualifier("importTransactionJobCsv") Job importTransactionJobCsv,
@@ -99,7 +102,7 @@ public class TransactionController {
     }
 
     @PostMapping("transactions")
-    public String handleFileUpload(@RequestHeader(CORRELATION_ID) String correlationId, @RequestParam("file") MultipartFile file, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
+    public ResponseEntity<String> handleFileUpload(@RequestHeader(CORRELATION_ID) String correlationId, @RequestParam("file") MultipartFile file, @RequestParam("token") String token, RedirectAttributes redirectAttributes) throws JsonProcessingException {
         logger.debug("Correlation ID for uploading file: {} ", correlationId);
 
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -110,9 +113,9 @@ public class TransactionController {
             transactionService.xmlFileUpload(file, token, redirectAttributes, jobLauncher, importTransactionJobXml, storageService);
         } else {
             redirectAttributes.addFlashAttribute("message", "Unsupported file type: " + fileExtension);
-            return IMPORT_URL;
+            return ResponseEntity.badRequest().body(IMPORT_URL);
         }
-        return IMPORT_URL;
+        return ResponseEntity.ok(IMPORT_URL);
     }
 
     @ExceptionHandler(StorageFileNotFoundException.class)
