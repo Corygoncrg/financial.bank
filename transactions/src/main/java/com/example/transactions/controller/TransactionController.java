@@ -38,7 +38,7 @@ public class TransactionController {
     private final Job importTransactionJobXml;
 
     @Value("${import.url}")
-    private String IMPORT_URL = "http://127.0.0.1:5500/html/import.html";
+    private String IMPORT_URL;
 
     @Autowired
     public TransactionController(StorageService storageService, JobLauncher jobLauncher, @Qualifier("importTransactionJobCsv") Job importTransactionJobCsv,
