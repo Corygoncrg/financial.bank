@@ -156,6 +156,7 @@ services:
       MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
       EXAMPLE_EMAIL: ${EXAMPLE_EMAIL}
       EXAMPLE_PASSWORD: ${EXAMPLE_PASSWORD}
+      HOSTNAME: http://localhost:8083
     volumes:
       - ~/.m2:/root/.m2
   security:
