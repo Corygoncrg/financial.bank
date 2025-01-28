@@ -48,7 +48,7 @@ public class UserController {
         return switch (result) {
             case SUCCESS -> ResponseEntity.ok().build();
             case USER_ALREADY_EXISTS -> ResponseEntity.status(HttpStatus.CONFLICT).body("User with this username or email already exists!");
-            case USER_NOT_VERIFIED -> ResponseEntity.ok("Unverified user found: a new key has been sent for the user");
+            case USER_NOT_VERIFIED -> ResponseEntity.ok("Unverified user found: if your key has expired, a new key has been sent.");
         };
     }
 

@@ -9,10 +9,7 @@ import com.example.users.dto.user.UserRegisterDto;
 import com.example.users.dto.user.UserUpdateDto;
 import com.example.users.factory.UserFactory;
 import com.example.users.kafka.KafkaUserValidatorService;
-import com.example.users.model.DeactivateUserResult;
-import com.example.users.model.RegisterUserResult;
-import com.example.users.model.UpdateUserResult;
-import com.example.users.model.VerifyUserResult;
+import com.example.users.model.*;
 import com.example.users.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +21,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import static com.example.users.model.UserStatusResult.*;
 
 @Service
 public class UserService {
@@ -45,36 +44,57 @@ public class UserService {
     }
 
     public RegisterUserResult register(@Valid UserRegisterDto dto) {
-        boolean userExistsOrPending = checkAndHandleExistingUser(dto.username(), repository::existsByName, repository::findByName) ||
-                checkAndHandleExistingUser(dto.email(), repository::existsByEmail, repository::findByEmail);
-        if (userExistsOrPending) {
-            return RegisterUserResult.USER_ALREADY_EXISTS;
+        UserStatusResult usernameResult = checkAndHandleExistingUser(dto.username(), repository::existsByName, repository::findByName);
+        UserStatusResult emailResult = checkAndHandleExistingUser(dto.email(), repository::existsByEmail, repository::findByEmail);
+
+        UserStatusResult combinedResult = combineResults(usernameResult, emailResult);
+
+        switch (combinedResult) {
+            case USER_EXISTS -> {
+                return RegisterUserResult.USER_ALREADY_EXISTS;
+            }
+            case USER_NOT_VERIFIED -> {
+                return RegisterUserResult.USER_NOT_VERIFIED;
+            }
+            case USER_NOT_EXISTS -> {
+                var user = factory.createUser(dto);
+                System.out.println("Registered user: " + user);
+
+                UserValidator validator = new UserValidator(user);
+                emailService.sendPasswordEmail(user, validator);
+                user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+
+                repository.save(user);
+                kafkaUserValidatorService.saveValidator(validator);
+                System.out.println(validator.getUuid());
+
+                return RegisterUserResult.SUCCESS;
+            }
         }
-
-        var user = factory.createUser(dto);
-        System.out.println("Registered user: " + user);
-        UserValidator validator = new UserValidator(user);
-
-        emailService.sendPasswordEmail(user, validator);
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-
-        repository.save(user);
-        kafkaUserValidatorService.saveValidator(validator);
-        System.out.println(validator.getUuid());
-
-        return RegisterUserResult.SUCCESS;
+        throw new IllegalStateException("Unexpected UserStatusResult: " + combinedResult);
     }
 
-    private boolean checkAndHandleExistingUser(String value, Predicate<String> existsCheck, Function<String, User> findUser) {
+    private UserStatusResult checkAndHandleExistingUser(String value, Predicate<String> existsCheck, Function<String, User> findUser) {
         if (existsCheck.test(value)) {
 
             var user = findUser.apply(value);
             if (user.getStatus() == UserStatus.PENDING) {
                 checkVerificationKey(user);
+                return USER_NOT_VERIFIED;
             }
-            return true;
+            return USER_EXISTS;
         }
-        return false;
+        return USER_NOT_EXISTS;
+    }
+
+    private UserStatusResult combineResults(UserStatusResult result1, UserStatusResult result2) {
+        if (result1 == UserStatusResult.USER_EXISTS || result2 == UserStatusResult.USER_EXISTS) {
+            return UserStatusResult.USER_EXISTS;
+        }
+        if (result1 == UserStatusResult.USER_NOT_VERIFIED || result2 == UserStatusResult.USER_NOT_VERIFIED) {
+            return UserStatusResult.USER_NOT_VERIFIED;
+        }
+        return UserStatusResult.USER_NOT_EXISTS;
     }
 
     private void checkVerificationKey(User user) {
