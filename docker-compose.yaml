@@ -154,8 +154,8 @@ services:
       MYSQL_DATABASE: financial_bank
       JWT_SECRET: 123456
       MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
-      EXAMPLE_EMAIL: ${EXAMPLE_EMAIL}
-      EXAMPLE_PASSWORD: ${EXAMPLE_PASSWORD}
+      ENV_EMAIL: ${ENV_EMAIL}
+      ENV_PASSWORD: ${ENV_PASSWORD}
       HOSTNAME: http://localhost:8083
     volumes:
       - ~/.m2:/root/.m2
