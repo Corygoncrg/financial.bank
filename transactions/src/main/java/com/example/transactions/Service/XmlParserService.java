@@ -43,7 +43,7 @@ public class XmlParserService {
             Document document = builder.parse(new ByteArrayInputStream(contentBuilder.toString().getBytes(StandardCharsets.UTF_8)));
             document.getDocumentElement().normalize();
 
-            NodeList dateNodes = document.getElementsByTagName("data");
+            NodeList dateNodes = document.getElementsByTagName("transactionDate");
             for (int i = 0; i < dateNodes.getLength(); i++) {
                 Node node = dateNodes.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {

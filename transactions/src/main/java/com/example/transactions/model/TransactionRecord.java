@@ -14,21 +14,21 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-@XmlRootElement(name = "transacao")
+@XmlRootElement(name = "transaction")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TransactionRecord {
 
 
-    @XmlElement(name = "origem")
+    @XmlElement(name = "origin")
     private BankDetails original;
 
-    @XmlElement(name = "destino")
+    @XmlElement(name = "destination")
     private BankDetails destiny;
 
-    @XmlElement(name = "valor")
+    @XmlElement(name = "amount")
     private BigDecimal amount;
 
-    @XmlElement(name = "data")
+    @XmlElement(name = "transactionDate")
     @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
     private LocalDateTime transactionDate;
 
@@ -39,13 +39,13 @@ public class TransactionRecord {
     @NoArgsConstructor
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class BankDetails {
-        @XmlElement(name = "banco")
+        @XmlElement(name = "bank")
         private String bank;
 
-        @XmlElement(name = "agencia")
+        @XmlElement(name = "agency")
         private String agency;
 
-        @XmlElement(name = "conta")
+        @XmlElement(name = "account")
         private String account;
     }
 

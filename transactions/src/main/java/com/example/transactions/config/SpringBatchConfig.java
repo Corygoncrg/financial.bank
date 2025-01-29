@@ -106,7 +106,7 @@ public class SpringBatchConfig {
     public StaxEventItemReader<TransactionRecord> xmlReader(@Value("#{jobParameters['filename']}") String filename) {
         StaxEventItemReader<TransactionRecord> reader = new StaxEventItemReader<>();
         reader.setResource(new FileSystemResource(uploadDirLocation + "/" + filename));
-        reader.setFragmentRootElementName("transacao");
+        reader.setFragmentRootElementName("transaction");
         Jaxb2Marshaller unmarshaller = new Jaxb2Marshaller();
         unmarshaller.setClassesToBeBound(TransactionRecord.class);
         reader.setUnmarshaller(unmarshaller);
