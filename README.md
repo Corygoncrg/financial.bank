@@ -14,7 +14,7 @@
 
 To be able to make imports, the user is required to be logged-in, for showcase purposes there is a default user,
 in case a user does not have an account, sign-up is possible, which will require email verification from the user,
-but that requires a .env file with ENV_EMAIL and ENV_PASSWORD [setup](https://github.com/Corygoncrg/financial.bank/edit/master/README.md#--setup).
+but that requires a .env file with ENV_EMAIL and ENV_PASSWORD [setup](https://github.com/Corygoncrg/financial.bank?tab=readme-ov-file#--setup).
 
 After logging in, the user will be able to go to the import page, and start making imports, or check for suspect transactions.
 
