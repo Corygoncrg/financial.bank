@@ -59,4 +59,5 @@ Once you are done setting up the .env file, you can run the docker-compose.yaml,
 | :-: | :-:
 Admin | 123999
 
-*The creation of the default user can be modified by going the following directory "/users/src/main/resources/db/migration", and changing or deleting the "V1.1__add-test-user-to-table-users.sql" file.
+* The creation of the default user can be modified by going the following directory "/users/src/main/resources/db/migration", and changing or deleting the "V1.1__add-test-user-to-table-users.sql" file.
+* Sample transactions are available in the sampleTransactions folder
